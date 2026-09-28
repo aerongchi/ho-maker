@@ -115,7 +115,10 @@ body.locked .bar,body.locked .tip,body.locked .scroller{display:none}
 .rulepop form{display:flex;gap:6px}
 .rulepop input{flex:1;min-width:0;border:1px solid var(--ui-line);border-radius:8px;padding:6px 8px;font-size:13px;font-family:inherit}
 .rulepop .btn{padding:5px 12px}
-.rulepop .rc{width:32px;flex:none;border-radius:8px;border:1px solid var(--ui-line);position:relative;overflow:hidden;cursor:pointer}
+.rulepop .crow{display:flex;gap:6px;align-items:center}
+.rulepop .crow .hex{flex:1;font-family:ui-monospace,Consolas,monospace;text-transform:uppercase;letter-spacing:.04em}
+.rulepop .crow .hex:invalid{border-color:#b03a4a}
+.rulepop .rc{width:32px;height:32px;flex:none;border-radius:8px;border:1px solid var(--ui-line);position:relative;overflow:hidden;cursor:pointer}
 .rulepop .rc input{position:absolute;inset:-8px;width:48px;height:48px;border:0;padding:0;cursor:pointer}
 .rulepop .foot2{display:flex;justify-content:space-between;gap:8px}
 .rulepop .foot2 button{border:0;background:none;font-size:12px;cursor:pointer;padding:2px 0;font-family:inherit;color:#8a8190}
@@ -236,7 +239,7 @@ const TX={
   guide:[["업로드","칸을 누르거나 사진을 끌어다 놓기"],["자리 이동","사진을 끌어서 옮기기"],["글자 수정","글자를 눌러서 바로 입력"],["룰 태그","사진 왼쪽 위 「# 룰」 누르기"]],
   crop:"사진 자르기",cropHint:"드래그로 위치를, 슬라이더(또는 마우스 휠)로 크기를 조절하세요.",
   cancel:"취소",ok:"적용",saved:"이미지를 만들었어요",savedHint:"다운로드가 안 되면 이미지를 길게 누르거나 우클릭해서 저장하세요.",close:"닫기",
-  band:"TRPG · 4PL 시나리오",sub:"어떤 HO를 제일 많이 했을까?",addSlot:"+ 칸 추가",ruleAdd:"# 룰",rulePh:"룰 이름 (예: CoC7)",ruleColor:"태그 색",ruleTheme:"테마색 쓰기",ruleDel:"태그 지우기",unit:"명",most:"MOST",
+  band:"TRPG · 4PL 시나리오",sub:"어떤 HO를 제일 많이 했을까?",addSlot:"+ 칸 추가",ruleAdd:"# 룰",rulePh:"룰 이름 (예: CoC7)",ruleColor:"태그 색",ruleDel:"태그 지우기",unit:"명",most:"MOST",
   scenPh:"시나리오명",pcPh:"PC 이름",addRow:"+ 라인 추가",addEtc:"+ ETC 추가",delRow:"라인 삭제",delSlot:"칸 삭제",recrop:"다시 자르기",
   resetQ:"한 번 더 누르면 초기화",exporting:"만드는 중…",
   work:"작업",image:"이미지 저장",undo:"되돌리기 (Ctrl+Z)",redo:"다시 실행 (Ctrl+Y)",
@@ -248,7 +251,7 @@ const TX={
   guide:[["アップロード","枠をクリック、または画像をドロップ"],["並べ替え","画像をドラッグして移動"],["文字の編集","文字をクリックして入力"],["ルールタグ","画像左上の「# ルール」をクリック"]],
   crop:"画像トリミング",cropHint:"ドラッグで位置、スライダー（またはホイール）でサイズを調整できます。",
   cancel:"キャンセル",ok:"決定",saved:"画像ができました",savedHint:"ダウンロードされない場合は、画像を長押しまたは右クリックで保存してください。",close:"閉じる",
-  band:"TRPG・4PLシナリオ",sub:"どのHOが一番多いかな？",addSlot:"+ 枠を追加",ruleAdd:"# ルール",rulePh:"ルール名（例：CoC7）",ruleColor:"タグの色",ruleTheme:"テーマ色に戻す",ruleDel:"タグを消す",unit:"人",most:"MOST",
+  band:"TRPG・4PLシナリオ",sub:"どのHOが一番多いかな？",addSlot:"+ 枠を追加",ruleAdd:"# ルール",rulePh:"ルール名（例：CoC7）",ruleColor:"タグの色",ruleDel:"タグを消す",unit:"人",most:"MOST",
   scenPh:"シナリオ名",pcPh:"PC名",addRow:"+ ライン追加",addEtc:"+ ETC追加",delRow:"ライン削除",delSlot:"枠を削除",recrop:"再トリミング",
   resetQ:"もう一度押すとリセット",exporting:"作成中…",
   work:"作業",image:"画像を保存",undo:"元に戻す (Ctrl+Z)",redo:"やり直す (Ctrl+Y)",
@@ -346,19 +349,24 @@ function openRulePop(btn,ri,si){
   const sameColor=name=>{for(const r of S.rows)for(const x of r.slots)if(x!==slot&&x.rule===name&&x.ruleColor)return x.ruleColor;return""};
   let pick=curC,touched=false;
   const el=document.createElement("div");el.className="rulepop";
+  const startC=(curC||themeColors()[0]).toUpperCase();
   el.innerHTML=`<form><input id="ruleInput" maxlength="20" placeholder="${esc(t("rulePh"))}" value="${esc(cur)}">
-      <label class="rc" title="${esc(t("ruleColor"))}"><input type="color" id="ruleColorInput" value="${curC||themeColors()[0]}" aria-label="${esc(t("ruleColor"))}"></label>
       <button class="btn primary" type="submit">OK</button></form>
-    <div class="foot2"><button type="button" class="usetheme">${t("ruleTheme")}</button>${cur?`<button type="button" class="del">${t("ruleDel")}</button>`:""}</div>`;
+    <div class="crow">
+      <label class="rc" title="${esc(t("ruleColor"))}"><input type="color" id="ruleColorInput" value="${startC.toLowerCase()}" aria-label="${esc(t("ruleColor"))}"></label>
+      <input class="hex" id="ruleHex" value="${startC}" maxlength="7" pattern="#?[0-9A-Fa-f]{6}" spellcheck="false" aria-label="HEX">
+    </div>
+    ${cur?`<div class="foot2"><span></span><button type="button" class="del">${t("ruleDel")}</button></div>`:""}`;
   document.body.appendChild(el);rulePop=el;
-  const ci=el.querySelector("#ruleColorInput");
-  ci.addEventListener("input",()=>{pick=ci.value;touched=true});
+  const ci=el.querySelector("#ruleColorInput"),hx=el.querySelector("#ruleHex");
+  ci.addEventListener("input",()=>{pick=ci.value;touched=true;hx.value=ci.value.toUpperCase()});
+  hx.addEventListener("input",()=>{const v=(hx.value.startsWith("#")?hx.value:"#"+hx.value);if(HEX.test(v)){pick=v.toLowerCase();touched=true;ci.value=pick}});
   const set=(v,c)=>{v=v.trim();if(!v)c="";closeRulePop();if(v===cur&&c===curC)return;remember();slot.rule=v;slot.ruleColor=c;render()};
   const val=()=>el.querySelector("#ruleInput").value;
   el.addEventListener("click",e=>{
     if(e.target.closest(".del"))set("","");
-    else if(e.target.closest(".usetheme"))set(val()||cur,"");
   });
+  hx.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();el.querySelector("form").requestSubmit()}});
   el.querySelector("form").addEventListener("submit",e=>{e.preventDefault();const v=val().trim();set(v,touched?pick:(curC||sameColor(v)))});
   const r=btn.getBoundingClientRect(),w=el.offsetWidth,h=el.offsetHeight;
   el.style.left=Math.max(8,Math.min(r.left,innerWidth-w-8))+"px";
