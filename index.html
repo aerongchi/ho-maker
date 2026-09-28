@@ -21,23 +21,52 @@ body{margin:0;background:var(--ui-bg);color:var(--ui-ink);font-family:var(--font
 button,input{font-family:inherit}
 
 /* ---- toolbar ---- */
-.bar{max-width:1040px;margin:0 auto 16px;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;
-  background:#fff;border:1px solid var(--ui-line);border-radius:14px;padding:12px 16px}
-.bar h1{font-size:18px;margin:0;color:var(--deep);font-weight:900}
-.group{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.group>span{font-size:12px;letter-spacing:.04em;color:#8a8190}
-.sw{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--ui-line);cursor:pointer;padding:0}
+.bar{max-width:1040px;margin:0 auto 10px;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;
+  background:#fff;border:1px solid var(--ui-line);border-radius:16px;padding:10px 12px 10px 18px}
+.brand{font-size:17px;margin:0;color:var(--deep);font-weight:900;white-space:nowrap}
+.swatches{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.sw{width:22px;height:22px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--ui-line);cursor:pointer;padding:0;flex:none}
 .sw[aria-pressed=true]{box-shadow:0 0 0 2px var(--ui-ink)}
 .sw.custom{position:relative;overflow:hidden;background:conic-gradient(#f4a7b9,#f7e08a,#a8e6cf,#a7d3f4,#c9b6f2,#f4a7b9)}
-.sw.custom input{position:absolute;inset:-6px;width:40px;height:40px;opacity:0;cursor:pointer;border:0;padding:0}
-.btn:disabled{opacity:.4;cursor:default}
-.check{display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;white-space:nowrap}
-.check input{accent-color:var(--deep);width:16px;height:16px;margin:0}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ui-ink);color:#fff;font-size:13px;line-height:1.5;
-  padding:10px 18px;border-radius:12px;z-index:20;max-width:calc(100% - 32px);text-align:center}
+.sw.custom input{position:absolute;inset:-6px;width:36px;height:36px;opacity:0;cursor:pointer;border:0;padding:0}
+.tools{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sep{width:1px;height:22px;background:var(--ui-line)}
+.seg{display:flex;background:var(--ui-bg);border-radius:999px;padding:3px}
+.seg button{border:0;background:none;border-radius:999px;padding:4px 10px;font-size:12px;cursor:pointer;color:#8a8190;line-height:1.4}
+.seg button.on{background:#fff;color:var(--ui-ink);font-weight:700;box-shadow:0 1px 2px rgba(0,0,0,.08)}
+.ib{width:32px;height:32px;border-radius:50%;border:0;background:none;color:var(--ui-ink);cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.ib:hover:not(:disabled){background:var(--ui-bg)}
+.ib:disabled{opacity:.3;cursor:default}
+.ib svg{width:18px;height:18px}
 .btn{border:1px solid var(--ui-line);background:#fff;border-radius:999px;padding:6px 14px;cursor:pointer;font-size:13px;
   color:var(--ui-ink);white-space:nowrap;line-height:1.4}
 .btn.on,.btn.primary{background:var(--main);border-color:var(--main);color:var(--on-main);font-weight:700}
+.btn:disabled{opacity:.4;cursor:default}
+/* 드롭다운 메뉴 */
+.menu{position:relative}
+.menu summary{list-style:none;display:flex;align-items:center;gap:6px}
+.menu summary::-webkit-details-marker{display:none}
+.menu summary::after{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:translateY(-2px) rotate(45deg)}
+.pop{position:absolute;right:0;top:calc(100% + 6px);background:#fff;border:1px solid var(--ui-line);border-radius:12px;padding:6px;
+  min-width:190px;box-shadow:0 8px 24px rgba(40,30,45,.12);z-index:15;display:flex;flex-direction:column}
+.pop button{border:0;background:none;text-align:left;padding:8px 12px;border-radius:8px;font-size:13px;cursor:pointer;color:var(--ui-ink);white-space:nowrap}
+.pop button:hover{background:var(--ui-bg)}
+.pop button.danger{color:#b03a4a}
+.pop hr{border:0;border-top:1px solid var(--ui-line);margin:4px 6px}
+.check{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;white-space:nowrap;padding:8px 12px}
+.check input{accent-color:var(--deep);width:16px;height:16px;margin:0}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ui-ink);color:#fff;font-size:13px;line-height:1.5;
+  padding:10px 18px;border-radius:12px;z-index:20;max-width:calc(100% - 32px);text-align:center}
+/* 비밀번호 화면 */
+body.locked .bar,body.locked .tip,body.locked .scroller{display:none}
+.gate{min-height:80vh;display:flex;align-items:center;justify-content:center}
+.gate form{background:#fff;border:1px solid var(--ui-line);border-radius:20px;padding:28px 24px;width:340px;max-width:100%;display:flex;flex-direction:column;gap:12px;text-align:center}
+.gate h1{margin:0;font-size:22px;color:var(--deep);font-weight:900}
+.gate p{margin:0;font-size:13px;color:#8a8190;line-height:1.6}
+.gate input{border:1px solid var(--ui-line);border-radius:10px;padding:10px 12px;font-size:16px;text-align:center;letter-spacing:.1em}
+.gate input:focus{outline:2px solid var(--main);border-color:var(--main)}
+.gate .err{color:#b03a4a}
+.gate .btn{padding:10px}
 .btn:focus-visible,.sw:focus-visible,[contenteditable]:focus-visible{outline:2px solid var(--deep);outline-offset:2px}
 .scroller{overflow-x:auto;max-width:1040px;margin:0 auto}
 .tip{max-width:1040px;margin:0 auto 10px;font-size:12px;color:#8a8190}
@@ -93,12 +122,6 @@ button,input{font-family:inherit}
 .cell.dragging{opacity:.4}
 .cell.over .pic,.cells.over{outline:2px dashed var(--deep);outline-offset:3px}
 .addrow{display:flex;gap:8px;margin:0 0 20px}
-/* 세로형 (휴대폰 공유용) */
-#sheet.vert{width:640px;padding:32px 28px 28px}
-.vert .head{flex-direction:column;align-items:stretch;gap:16px}
-.vert .owner{width:auto;padding:10px 18px}
-.vert .title{font-size:32px}
-.vert .cells{grid-template-columns:repeat(4,minmax(0,1fr))}
 .foot{display:flex;justify-content:flex-end;margin-top:8px;font-size:11px;letter-spacing:.08em;color:var(--deep);opacity:.7}
 
 /* export: hide edit UI and placeholders */
@@ -119,24 +142,39 @@ button,input{font-family:inherit}
 #result img{max-width:100%;border-radius:8px;display:block}
 </style>
 </head>
-<body>
+<body class="locked">
+
+<div class="gate" id="gate">
+  <form id="gateForm" autocomplete="off">
+    <h1>HO 메이커</h1>
+    <p>비밀번호를 입력해 주세요<br>パスワードを入力してください</p>
+    <input type="password" id="gatePw" aria-label="Password" autofocus>
+    <p class="err" id="gateErr" hidden>비밀번호가 달라요 / パスワードが違います</p>
+    <button class="btn primary" type="submit">확인 · OK</button>
+  </form>
+</div>
 
 <div class="bar">
-  <h1 data-t="app"></h1>
-  <div class="group"><span data-t="theme"></span><div class="group" id="swatches"></div>
-    <label class="sw custom" id="customSw"><input type="color" id="customColor" value="#f4a7b9"></label></div>
-  <div class="group"><span data-t="lang"></span>
-    <button class="btn" data-lang="ko">한국어</button><button class="btn" data-lang="ja">日本語</button></div>
-  <div class="group"><span data-t="layout"></span>
-    <button class="btn" data-layout="h" data-t="horiz"></button><button class="btn" data-layout="v" data-t="vert"></button></div>
-  <div class="group"><span data-t="work"></span>
-    <button class="btn" id="undoBtn" data-t="undo"></button><button class="btn" id="redoBtn" data-t="redo"></button>
-    <button class="btn" id="saveProj" data-t="saveProj"></button><button class="btn" id="loadProj" data-t="loadProj"></button>
-    <button class="btn" id="resetBtn" data-t="reset"></button></div>
-  <div class="group"><span data-t="image"></span>
-    <label class="check"><input type="checkbox" id="hideEmpty"><span data-t="hideEmpty"></span></label>
-    <button class="btn primary" id="savePng" data-t="png"></button>
-    <button class="btn primary" id="saveJpg" data-t="jpg"></button></div>
+  <h1 class="brand" data-t="app"></h1>
+  <div class="swatches" id="swatches"></div>
+  <div class="tools">
+    <div class="seg" role="group" aria-label="Language"><button data-lang="ko">한국어</button><button data-lang="ja">日本語</button></div>
+    <span class="sep"></span>
+    <button class="ib" id="undoBtn" data-tt="undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+    <button class="ib" id="redoBtn" data-tt="redo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
+    <details class="menu"><summary class="btn" data-t="work"></summary>
+      <div class="pop">
+        <button id="saveProj" data-t="saveProj"></button>
+        <button id="loadProj" data-t="loadProj"></button>
+        <hr><button id="resetBtn" class="danger" data-t="reset"></button>
+      </div></details>
+    <details class="menu"><summary class="btn primary" data-t="image"></summary>
+      <div class="pop">
+        <button id="savePng" data-t="png"></button>
+        <button id="saveJpg" data-t="jpg"></button>
+        <hr><label class="check"><input type="checkbox" id="hideEmpty"><span data-t="hideEmpty"></span></label>
+      </div></details>
+  </div>
 </div>
 <p class="tip" data-t="tip"></p>
 
@@ -177,26 +215,26 @@ const THEMES={
   lilac:["#f0b5e4","#fdeaf9","#733a67","#632e58"],      mono:["#222222","#e6e6e6","#222222","#ffffff"]
 };
 const TX={
- ko:{app:"HO 메이커",theme:"테마",lang:"언어",png:"PNG 저장",jpg:"JPG 저장",reset:"초기화",
-  tip:"사진 칸을 누르거나 파일을 끌어다 놓으면 업로드, ✂로 다시 자르기. 사진은 끌어서 순서·라인을 옮길 수 있고, 글자는 눌러서 수정해요. Ctrl+Z로 되돌리기.",
+ ko:{app:"HO 메이커",theme:"테마",lang:"언어",png:"PNG로 저장",jpg:"JPG로 저장",reset:"초기화",
+  tip:"칸을 누르거나 사진을 끌어다 놓으면 업로드 · 사진은 끌어서 자리 이동 · 글자는 눌러서 수정",
   crop:"사진 자르기",cropHint:"드래그로 위치를, 슬라이더(또는 마우스 휠)로 크기를 조절하세요.",
   cancel:"취소",ok:"적용",saved:"이미지를 만들었어요",savedHint:"다운로드가 안 되면 이미지를 길게 누르거나 우클릭해서 저장하세요.",close:"닫기",
   band:"TRPG · 4PL 시나리오",sub:"어떤 HO를 제일 많이 했을까?",owner:"PL 이름",ownerPh:"이름 입력",addSlot:"+ 칸 추가",unit:"명",most:"MOST",
   scenPh:"시나리오명",pcPh:"PC 이름",addRow:"+ 라인 추가",addEtc:"+ ETC 추가",delRow:"라인 삭제",delSlot:"칸 삭제",recrop:"다시 자르기",
   resetQ:"한 번 더 누르면 초기화",exporting:"만드는 중…",
-  layout:"배치",horiz:"가로형",vert:"세로형",work:"작업",image:"이미지",undo:"↶ 되돌리기",redo:"↷ 다시",
+  work:"작업",image:"이미지 저장",undo:"되돌리기 (Ctrl+Z)",redo:"다시 실행 (Ctrl+Y)",
   saveProj:"작업 저장",loadProj:"불러오기",hideEmpty:"빈 칸 빼고 저장",custom:"직접 고르기",
   loaded:"작업을 불러왔어요.",projSaved:"작업 파일을 저장했어요. 나중에 '불러오기'로 이어서 할 수 있어요.",
   loadErr:"HO 메이커 작업 파일이 아니라서 불러오지 못했어요.",
   quota:"브라우저 저장 공간이 가득 찼어요. '작업 저장'으로 파일에 보관해 주세요.",notImage:"이미지 파일만 올릴 수 있어요."},
- ja:{app:"HOメーカー",theme:"テーマ",lang:"言語",png:"PNG保存",jpg:"JPG保存",reset:"リセット",
-  tip:"枠をクリックまたはファイルをドロップで画像アップロード、✂で再トリミング。画像はドラッグで並べ替え・ライン移動ができ、文字はクリックで編集できます。Ctrl+Zで元に戻す。",
+ ja:{app:"HOメーカー",theme:"テーマ",lang:"言語",png:"PNGで保存",jpg:"JPGで保存",reset:"リセット",
+  tip:"枠をクリックまたは画像をドロップでアップロード · 画像はドラッグで移動 · 文字はクリックで編集",
   crop:"画像トリミング",cropHint:"ドラッグで位置、スライダー（またはホイール）でサイズを調整できます。",
   cancel:"キャンセル",ok:"決定",saved:"画像ができました",savedHint:"ダウンロードされない場合は、画像を長押しまたは右クリックで保存してください。",close:"閉じる",
   band:"TRPG・4PLシナリオ",sub:"どのHOが一番多いかな？",owner:"PLネーム",ownerPh:"名前を入力",addSlot:"+ 枠を追加",unit:"人",most:"MOST",
   scenPh:"シナリオ名",pcPh:"PC名",addRow:"+ ライン追加",addEtc:"+ ETC追加",delRow:"ライン削除",delSlot:"枠を削除",recrop:"再トリミング",
   resetQ:"もう一度押すとリセット",exporting:"作成中…",
-  layout:"レイアウト",horiz:"横長",vert:"縦長",work:"作業",image:"画像",undo:"↶ 元に戻す",redo:"↷ やり直す",
+  work:"作業",image:"画像を保存",undo:"元に戻す (Ctrl+Z)",redo:"やり直す (Ctrl+Y)",
   saveProj:"作業を保存",loadProj:"読み込む",hideEmpty:"空欄を除いて保存",custom:"カスタム",
   loaded:"作業を読み込みました。",projSaved:"作業ファイルを保存しました。「読み込む」で続きから編集できます。",
   loadErr:"HOメーカーの作業ファイルではないため読み込めませんでした。",
@@ -216,7 +254,6 @@ function normalize(o){
     lang:TX[o.lang]?o.lang:"ko",
     theme:(THEMES[o.theme]||(o.theme==="custom"&&HEX.test(o.custom)))?o.theme:"strawberry",
     custom:HEX.test(o.custom)?o.custom:"#f4a7b9",
-    layout:o.layout==="v"?"v":"h",
     band:typeof o.band==="string"?o.band:null, sub:typeof o.sub==="string"?o.sub:null, owner:str(o.owner),
     rows:o.rows.filter(r=>r&&Array.isArray(r.slots)).map(r=>({a:str(r.a),b:str(r.b),
       slots:r.slots.filter(Boolean).map(x=>{
@@ -281,8 +318,7 @@ function render(){
   document.title=t("app");
   document.querySelectorAll("[data-t]").forEach(e=>e.textContent=t(e.dataset.t));
   document.querySelectorAll("[data-lang]").forEach(b=>b.classList.toggle("on",b.dataset.lang===S.lang));
-  document.querySelectorAll("[data-layout]").forEach(b=>b.classList.toggle("on",b.dataset.layout===S.layout));
-  sheet.classList.toggle("vert",S.layout==="v");
+  document.querySelectorAll("[data-tt]").forEach(e=>{e.title=t(e.dataset.tt);e.setAttribute("aria-label",t(e.dataset.tt))});
   updateUndo();
   sheet.innerHTML=`
   <div class="head">
@@ -361,18 +397,19 @@ sheet.addEventListener("click",e=>{
 const sw=document.getElementById("swatches");
 Object.entries(THEMES).forEach(([k,[m]])=>{const b=document.createElement("button");b.className="sw";b.dataset.th=k;b.title=k;b.setAttribute("aria-label",k);b.style.background=m;
   b.onclick=()=>{if(S.theme===k)return;remember();S.theme=k;applyTheme();save()};sw.appendChild(b)});
+sw.insertAdjacentHTML("beforeend",'<label class="sw custom" id="customSw"><input type="color" id="customColor" value="#f4a7b9"></label>');
 const cc=document.getElementById("customColor");
 cc.addEventListener("click",()=>{if(S.theme!=="custom"){remember();S.theme="custom";applyTheme();save()}});
 cc.addEventListener("input",()=>{S.theme="custom";S.custom=cc.value;applyTheme()});
 cc.addEventListener("change",()=>{S.custom=cc.value;save()});
-document.querySelectorAll("[data-layout]").forEach(b=>b.onclick=()=>{if(S.layout===b.dataset.layout)return;remember();S.layout=b.dataset.layout;render()});
+
 document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{
   // 기본 문구를 그대로 쓰고 있었다면 새 언어의 기본 문구로 바꿈
   const old=TX[S.lang];if(S.band===old.band)S.band=null;if(S.sub===old.sub)S.sub=null;
   if(S.lang===b.dataset.lang)return;remember();S.lang=b.dataset.lang;render()});
 let resetArm=0;const rb=document.getElementById("resetBtn");
 rb.onclick=()=>{
-  if(Date.now()-resetArm<4000){remember();const{lang,theme,custom,layout}=S;S={...normalize(blank()),lang,theme,custom,layout};resetArm=0;render()}
+  if(Date.now()-resetArm<4000){remember();const{lang,theme,custom}=S;S={...normalize(blank()),lang,theme,custom};resetArm=0;render()}
   else{resetArm=Date.now();rb.textContent=t("resetQ");setTimeout(()=>{rb.textContent=t("reset")},4000)}
 };
 
@@ -500,6 +537,12 @@ projFile.onchange=()=>{
   r.readAsText(f);
 };
 
+/* ---- 메뉴: 바깥을 누르거나 항목을 고르면 닫힘 ---- */
+document.addEventListener("click",e=>{
+  document.querySelectorAll("details.menu[open]").forEach(d=>{
+    if(!d.contains(e.target)||e.target.closest(".pop button:not(#resetBtn)"))d.open=false});
+});
+
 /* ---- 단축키: 글자 입력 중에는 브라우저 기본 되돌리기를 씀 ---- */
 document.getElementById("undoBtn").onclick=undo;
 document.getElementById("redoBtn").onclick=redo;
@@ -512,6 +555,19 @@ document.addEventListener("keydown",e=>{
 });
 
 render();
+
+/* ---- 비밀번호 화면 (SHA-256 해시만 코드에 둠) ---- */
+const PW_HASH="8c8138f0a5f6fde305deecd0395d8e08aedbe1cfb356f3f7064b246280b35219";
+async function sha256(txt){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(txt));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+function unlock(){document.body.classList.remove("locked");document.getElementById("gate").remove()}
+let unlocked=false;try{unlocked=localStorage.getItem("ho-unlock")===PW_HASH}catch(e){}
+if(unlocked)unlock();
+else document.getElementById("gateForm").addEventListener("submit",async e=>{
+  e.preventDefault();
+  const h=await sha256(document.getElementById("gatePw").value.trim().toUpperCase());
+  if(h===PW_HASH){try{localStorage.setItem("ho-unlock",h)}catch(e){}unlock()}
+  else{document.getElementById("gateErr").hidden=false;document.getElementById("gatePw").select()}
+});
 </script>
 </body>
 </html>
