@@ -107,10 +107,11 @@ body.locked .bar,body.locked .tip,body.locked .scroller{display:none}
 /* 대문자만 있는 배지: 글자 박스를 대문자 높이로 잘라 위아래를 같게, 마지막 글자 뒤 자간만큼 오른쪽 여백을 줄여 좌우를 같게 */
 .tab .most{font-size:11px;font-weight:900;letter-spacing:.06em;background:var(--paper);color:var(--deep);border-radius:999px;
   line-height:1;padding:5px calc(8px - .06em) 5px 8px;text-box:trim-both cap alphabetic}
-.cells{background:var(--soft);border-radius:0 14px 14px 14px;padding:18px 16px 14px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:18px 12px;align-items:start}
-.cell{display:flex;flex-direction:column;gap:3px;align-items:stretch;position:relative;min-width:0}
-.pic{width:100%;aspect-ratio:1;background:var(--paper);border-radius:12px;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;
-  color:var(--main);font-size:28px;line-height:1;box-shadow:0 1px 0 rgba(0,0,0,.06)}
+.cells{background:var(--soft);border-radius:0 14px 14px 14px;padding:16px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:12px 10px;align-items:stretch}
+.cell{display:flex;flex-direction:column;gap:2px;align-items:stretch;position:relative;min-width:0;background:var(--paper);border-radius:14px;padding:6px 6px 9px;box-shadow:0 1px 0 rgba(0,0,0,.05)}
+.pic{width:100%;aspect-ratio:1;background:var(--soft);border-radius:9px;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--main);font-size:28px;line-height:1}
+.pic:has(img){background:#fff}
 .pic{position:relative}
 .pic img{width:100%;height:100%;object-fit:cover;display:block}
 /* 룰 태그: 사진 왼쪽 아래에 붙는 작은 라벨 */
@@ -133,7 +134,7 @@ body.locked .bar,body.locked .tip,body.locked .scroller{display:none}
 .rulepop .foot2 button{border:0;background:none;font-size:12px;cursor:pointer;padding:2px 0;font-family:inherit;color:#8a8190}
 .rulepop .foot2 .del{color:#b03a4a;font-size:12px;cursor:pointer;padding:2px 0;font-family:inherit}
 .cap{text-align:center;line-height:1.35;min-height:1.35em}
-.cap.scen{font-size:11px;font-weight:700;color:var(--deep);margin-top:4px}
+.cap.scen{font-size:11px;font-weight:700;color:var(--deep);margin-top:5px}
 .cap.pc{font-size:14px;font-weight:900;color:#2a2530}
 .mini{position:absolute;top:-8px;width:22px;height:22px;border-radius:50%;border:none;
   font-size:12px;line-height:22px;cursor:pointer;padding:0;text-align:center;font-family:Arial,sans-serif}
