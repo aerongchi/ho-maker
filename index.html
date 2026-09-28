@@ -41,40 +41,43 @@ button,input{font-family:inherit}
 .ed:hover{background:rgba(255,255,255,.35);border-radius:4px}
 
 /* ---- sheet ---- */
-#sheet{width:1000px;background:var(--paper);padding:48px 40px 40px;margin:0 auto;color:#222}
-.head{margin:0 40px 36px 88px}
-.topband{background:var(--main);color:var(--on-main);text-align:center;font-weight:900;font-size:26px;line-height:1.4;padding:10px 16px;border-radius:10px;min-height:56px}
-.titlewrap{display:flex;align-items:flex-end;gap:22px;margin-top:14px}
-.ho-big{font-weight:900;font-size:130px;line-height:1;color:var(--deep);flex:none;display:flex;flex-direction:column}
-.ho-big small{font-size:15px;font-weight:700;letter-spacing:.9em;line-height:1.2;padding-left:6px}
-.ho-big b{display:block;line-height:.82;letter-spacing:-.02em}
-.sub{font-weight:900;font-size:44px;line-height:1.25;color:#222;flex:1;min-width:0;padding-bottom:4px}
-.row{display:flex;gap:16px;margin-bottom:22px;align-items:stretch}
-.label{width:72px;flex:none;background:var(--main);color:var(--on-main);border-radius:10px;display:flex;flex-direction:column;
-  align-items:center;justify-content:center;font-weight:900;position:relative;padding:10px 4px;gap:2px;text-align:center}
-.label .l1{font-size:20px;line-height:1.1;min-width:100%}
-.label .l2{font-size:42px;line-height:1.05;min-width:100%}
-.label .l2.long{font-size:20px}
-.label .ed:empty::before{color:currentColor;opacity:.4}
-.cells{flex:1;min-width:0;background:var(--soft);border-radius:12px;padding:16px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:16px 10px;align-items:start}
-.cell{display:flex;flex-direction:column;gap:4px;align-items:stretch;position:relative;min-width:0}
-.pic{width:100%;aspect-ratio:1;background:#fff;border:3px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.08);border-radius:8px;overflow:hidden;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;color:#c9bfcc;font-size:28px;line-height:1}
+#sheet{width:1000px;background:var(--paper);padding:44px 44px 36px;margin:0 auto;color:#2a2530}
+.head{display:flex;justify-content:space-between;align-items:flex-end;gap:32px;padding-bottom:22px;border-bottom:2px solid var(--main)}
+.head-l{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
+.eyebrow{align-self:flex-start;background:var(--main);color:var(--on-main);font-size:14px;font-weight:700;letter-spacing:.08em;
+  padding:4px 14px;border-radius:999px;line-height:1.5;min-width:60px}
+.title{font-size:40px;font-weight:900;line-height:1.25;color:#2a2530;letter-spacing:-.01em}
+.owner{flex:none;width:250px;background:var(--soft);border-radius:16px;padding:12px 18px;display:flex;flex-direction:column;gap:2px}
+.owner small{font-size:12px;font-weight:700;color:var(--deep);letter-spacing:.06em}
+.owner .ed{font-size:26px;font-weight:900;line-height:1.3;color:#2a2530;min-height:1.3em}
+.tally{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 26px}
+.chip{display:flex;align-items:center;gap:8px;border:1.5px solid var(--main);border-radius:999px;padding:4px 6px 4px 14px;font-size:14px;font-weight:700;line-height:1.4}
+.chip b{background:var(--main);color:var(--on-main);border-radius:999px;min-width:28px;text-align:center;padding:0 8px;font-variant-numeric:tabular-nums}
+.chip.top{background:var(--soft)}
+.row{margin-bottom:22px}
+.tab{display:inline-flex;align-items:center;gap:10px;background:var(--main);color:var(--on-main);border-radius:12px 12px 0 0;
+  padding:7px 16px 6px;font-weight:900;position:relative}
+.tab .l1,.tab .l2{font-size:20px;line-height:1.3}
+.tab .l1{margin-right:-6px;min-width:.5em}
+.tab .ed:empty::before{color:currentColor;opacity:.45}
+.tab .cnt{font-size:13px;font-weight:700;opacity:.85;font-variant-numeric:tabular-nums}
+.tab .most{font-size:11px;font-weight:900;letter-spacing:.06em;background:var(--paper);color:var(--deep);border-radius:999px;padding:1px 8px}
+.cells{background:var(--soft);border-radius:0 14px 14px 14px;padding:18px 16px 14px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:18px 12px;align-items:start}
+.cell{display:flex;flex-direction:column;gap:3px;align-items:stretch;position:relative;min-width:0}
+.pic{width:100%;aspect-ratio:1;background:var(--paper);border-radius:12px;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--main);font-size:28px;line-height:1;box-shadow:0 1px 0 rgba(0,0,0,.06)}
 .pic img{width:100%;height:100%;object-fit:cover;display:block}
-.cap{text-align:center;line-height:1.3;min-height:1.3em}
-.cap.scen{font-size:10.5px;color:#6b6270;font-weight:700;margin-top:2px}
-.cap.pc{font-size:13px;font-weight:900;color:#222}
+.cap{text-align:center;line-height:1.35;min-height:1.35em}
+.cap.pc{font-size:14px;font-weight:900;color:#2a2530;margin-top:4px}
+.cap.scen{font-size:11px;font-weight:700;color:var(--deep)}
 .mini{position:absolute;top:-8px;width:22px;height:22px;border-radius:50%;border:none;
   font-size:12px;line-height:22px;cursor:pointer;padding:0;text-align:center;font-family:Arial,sans-serif}
 .mini.del{right:-8px;background:var(--deep);color:#fff}
 .mini.crop{left:-8px;background:#fff;color:var(--deep);box-shadow:0 0 0 1px var(--ui-line)}
-.label .mini.del{right:-8px}
+.tab .mini.del{top:-9px;right:-11px}
 .addcell .pic{border:2px dashed var(--main);background:transparent;box-shadow:none;color:var(--deep)}
-.addrow{display:flex;gap:8px;margin:0 0 24px 88px}
-.foot{display:flex;justify-content:flex-end;margin-top:30px}
-.fline{display:flex;align-items:baseline;gap:12px;border-bottom:3px solid var(--deep);width:440px;padding-bottom:6px}
-.fline b{font-size:18px;white-space:nowrap;color:var(--deep);font-weight:900}
-.fline .ed{flex:1;font-size:26px;font-weight:900;line-height:1.3;min-width:0}
+.addrow{display:flex;gap:8px;margin:0 0 20px}
+.foot{display:flex;justify-content:flex-end;margin-top:8px;font-size:11px;letter-spacing:.08em;color:var(--deep);opacity:.7}
 
 /* export: hide edit UI and placeholders */
 .exporting .edit-only{display:none!important}
@@ -147,14 +150,14 @@ const TX={
   tip:"사진 칸을 누르면 업로드, ✂ 버튼으로 다시 자르기. 글자는 모두 눌러서 수정할 수 있어요.",
   crop:"사진 자르기",cropHint:"드래그로 위치를, 슬라이더(또는 마우스 휠)로 크기를 조절하세요.",
   cancel:"취소",ok:"적용",saved:"이미지를 만들었어요",savedHint:"다운로드가 안 되면 이미지를 길게 누르거나 우클릭해서 저장하세요.",close:"닫기",
-  band:"TRPG 4PL 시나리오의",sub:"뭐가 많을까",kana:"핸드아웃",owner:"이름 :",
+  band:"TRPG · 4PL 시나리오",sub:"어떤 HO를 제일 많이 했을까?",owner:"PL 이름",unit:"명",most:"MOST",
   scenPh:"시나리오명",pcPh:"PC 이름",addRow:"+ 라인 추가",addEtc:"+ ETC 추가",delRow:"라인 삭제",delSlot:"칸 삭제",recrop:"다시 자르기",
   resetQ:"한 번 더 누르면 초기화",exporting:"만드는 중…"},
  ja:{app:"HOメーカー",theme:"テーマ",lang:"言語",png:"PNG保存",jpg:"JPG保存",reset:"リセット",
   tip:"枠をクリックで画像アップロード、✂ボタンで再トリミング。文字はすべてクリックで編集できます。",
   crop:"画像トリミング",cropHint:"ドラッグで位置、スライダー（またはホイール）でサイズを調整できます。",
   cancel:"キャンセル",ok:"決定",saved:"画像ができました",savedHint:"ダウンロードされない場合は、画像を長押しまたは右クリックで保存してください。",close:"閉じる",
-  band:"TRPG 4PLシナリオの",sub:"どれが多いかな",kana:"ハンドアウト",owner:"おなまえ :",
+  band:"TRPG・4PLシナリオ",sub:"どのHOが一番多いかな？",owner:"PLネーム",unit:"人",most:"MOST",
   scenPh:"シナリオ名",pcPh:"PC名",addRow:"+ ライン追加",addEtc:"+ ETC追加",delRow:"ライン削除",delSlot:"枠を削除",recrop:"再トリミング",
   resetQ:"もう一度押すとリセット",exporting:"作成中…"}
 };
@@ -179,6 +182,17 @@ function applyTheme(){
   r.setProperty("--main",m);r.setProperty("--soft",s);r.setProperty("--deep",d);r.setProperty("--on-main",o);
   document.querySelectorAll(".sw").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.th===S.theme)));
 }
+// 사진이나 PC 이름이 들어간 칸만 셈
+function updateTally(){
+  const counts=S.rows.map(r=>r.slots.filter(s=>s.img||s.pc.trim()).length);
+  const max=Math.max(0,...counts);
+  document.getElementById("tally").innerHTML=S.rows.map((r,i)=>
+    `<span class="chip${counts[i]&&counts[i]===max?" top":""}">${esc((r.a+" "+r.b).trim())}<b>${counts[i]}</b></span>`).join("");
+  counts.forEach((c,i)=>{
+    const ce=sheet.querySelector(`[data-cnt="${i}"]`);if(ce)ce.textContent=`${c}${t("unit")}`;
+    const me=sheet.querySelector(`[data-most="${i}"]`);if(me)me.hidden=!(c&&c===max);
+  });
+}
 function render(){
   applyTheme();
   document.documentElement.lang=S.lang;
@@ -187,24 +201,26 @@ function render(){
   document.querySelectorAll("[data-lang]").forEach(b=>b.classList.toggle("on",b.dataset.lang===S.lang));
   sheet.innerHTML=`
   <div class="head">
-    ${ed("topband",'data-f="band"',S.band??t("band"),t("band"))}
-    <div class="titlewrap">
-      <div class="ho-big"><small>${t("kana")}</small><b>HO</b></div>
-      ${ed("sub",'data-f="sub"',S.sub??t("sub"),t("sub"))}
+    <div class="head-l">
+      ${ed("eyebrow",'data-f="band"',S.band??t("band"),t("band"))}
+      ${ed("title",'data-f="sub"',S.sub??t("sub"),t("sub"))}
     </div>
+    <div class="owner"><small>${t("owner")}</small>${ed("",'data-f="owner"',S.owner,"")}</div>
   </div>
+  <div class="tally" id="tally"></div>
   ${S.rows.map((r,ri)=>`
   <div class="row">
-    <div class="label">
+    <div class="tab">
       ${ed("l1",`data-ri="${ri}" data-k="a"`,r.a,"")}
-      ${ed("l2"+(r.b.length>2?" long":""),`data-ri="${ri}" data-k="b"`,r.b,"")}
+      ${ed("l2",`data-ri="${ri}" data-k="b"`,r.b,"")}
+      <span class="cnt" data-cnt="${ri}"></span><span class="most" data-most="${ri}" hidden>${t("most")}</span>
       <button class="mini del edit-only" data-act="delrow" data-ri="${ri}" title="${t("delRow")}" aria-label="${t("delRow")}">✕</button>
     </div>
     <div class="cells">
       ${r.slots.map((s,si)=>`<div class="cell">
         <div class="pic ${s.img?"":"empty"}" data-act="upload" data-ri="${ri}" data-si="${si}">${s.img?`<img src="${s.img}" alt="">`:"+"}</div>
-        ${ed("cap scen",`data-ri="${ri}" data-si="${si}" data-s="scen"`,s.scen,t("scenPh"))}
         ${ed("cap pc",`data-ri="${ri}" data-si="${si}" data-s="pc"`,s.pc,t("pcPh"))}
+        ${ed("cap scen",`data-ri="${ri}" data-si="${si}" data-s="scen"`,s.scen,t("scenPh"))}
         <button class="mini del edit-only" data-act="delslot" data-ri="${ri}" data-si="${si}" title="${t("delSlot")}" aria-label="${t("delSlot")}">✕</button>
         ${s.img?`<button class="mini crop edit-only" data-act="recrop" data-ri="${ri}" data-si="${si}" title="${t("recrop")}" aria-label="${t("recrop")}">✂</button>`:""}
       </div>`).join("")}
@@ -212,7 +228,8 @@ function render(){
     </div>
   </div>`).join("")}
   <div class="addrow edit-only"><button class="btn" data-act="addrow">${t("addRow")}</button><button class="btn" data-act="addetc">${t("addEtc")}</button></div>
-  <div class="foot"><div class="fline"><b>${t("owner")}</b>${ed("",'data-f="owner"',S.owner,"")}</div></div>`;
+  <div class="foot">HO MAKER</div>`;
+  updateTally();
   save();
 }
 
@@ -223,8 +240,9 @@ sheet.addEventListener("input",e=>{
   if(!v.trim()&&el.innerHTML!==""){el.innerHTML="";v=""}
   const d=el.dataset;
   if(d.f)S[d.f]=v;
-  else if(d.k){S.rows[d.ri][d.k]=v;if(d.k==="b")el.classList.toggle("long",v.length>2)}
+  else if(d.k)S.rows[d.ri][d.k]=v;
   else if(d.s)S.rows[d.ri].slots[d.si][d.s]=v;
+  if(d.k||d.s==="pc")updateTally();
   save();
 });
 sheet.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.closest(".ed")){e.preventDefault();e.target.blur()}});
