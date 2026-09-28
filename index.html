@@ -102,15 +102,13 @@ body.locked .bar,body.locked .tip,body.locked .scroller{display:none}
 .pic{position:relative}
 .pic img{width:100%;height:100%;object-fit:cover;display:block}
 /* 룰 태그: 사진 왼쪽 아래에 붙는 작은 라벨 */
-.rule{position:absolute;left:6px;bottom:6px;max-width:calc(100% - 12px);border:0;border-radius:999px;padding:2px 8px;
+.rule{position:absolute;left:6px;top:6px;background:var(--main);color:var(--on-main);max-width:calc(100% - 12px);border:0;border-radius:999px;padding:2px 8px;
   font-size:10.5px;font-weight:900;line-height:1.5;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   cursor:pointer;font-family:inherit;box-shadow:0 1px 2px rgba(0,0,0,.12)}
-.rule.add{background:rgba(255,255,255,.92);color:#8a8190;font-weight:700}
+.rule.add{background:rgba(255,255,255,.92);color:#8a8190;font-weight:700;box-shadow:0 0 0 1px var(--ui-line)}
 @media (hover:hover){.cell .rule.add{opacity:0;transition:opacity .15s}.cell:hover .rule.add,.rule.add:focus-visible{opacity:1}}
 .rulepop{position:fixed;z-index:16;background:#fff;border:1px solid var(--ui-line);border-radius:14px;padding:12px;width:260px;
   box-shadow:0 8px 24px rgba(40,30,45,.14);display:flex;flex-direction:column;gap:10px}
-.rulepop .presets{display:flex;flex-wrap:wrap;gap:6px}
-.rulepop .presets button{border:0;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}
 .rulepop form{display:flex;gap:6px}
 .rulepop input{flex:1;min-width:0;border:1px solid var(--ui-line);border-radius:8px;padding:6px 8px;font-size:13px;font-family:inherit}
 .rulepop .btn{padding:5px 12px}
@@ -121,7 +119,7 @@ body.locked .bar,body.locked .tip,body.locked .scroller{display:none}
 .mini{position:absolute;top:-8px;width:22px;height:22px;border-radius:50%;border:none;
   font-size:12px;line-height:22px;cursor:pointer;padding:0;text-align:center;font-family:Arial,sans-serif}
 .mini.del{right:-8px;background:var(--deep);color:#fff}
-.mini.crop{left:-8px;background:#fff;color:var(--deep);box-shadow:0 0 0 1px var(--ui-line)}
+.mini.crop{right:-8px;top:18px;background:#fff;color:var(--deep);box-shadow:0 0 0 1px var(--ui-line)}
 .tab .mini.del{top:-9px;right:-11px}
 .rowhead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
 .rowhead .btn{margin-bottom:6px;padding:3px 12px;font-size:12px}
@@ -231,7 +229,7 @@ const TX={
   tip:"칸을 누르거나 사진을 끌어다 놓으면 업로드 · 사진은 끌어서 자리 이동 · 글자는 눌러서 수정",
   crop:"사진 자르기",cropHint:"드래그로 위치를, 슬라이더(또는 마우스 휠)로 크기를 조절하세요.",
   cancel:"취소",ok:"적용",saved:"이미지를 만들었어요",savedHint:"다운로드가 안 되면 이미지를 길게 누르거나 우클릭해서 저장하세요.",close:"닫기",
-  band:"TRPG · 4PL 시나리오",sub:"어떤 HO를 제일 많이 했을까?",addSlot:"+ 칸 추가",ruleAdd:"# 룰",rulePh:"룰 이름 직접 입력",ruleDel:"태그 지우기",unit:"명",most:"MOST",
+  band:"TRPG · 4PL 시나리오",sub:"어떤 HO를 제일 많이 했을까?",addSlot:"+ 칸 추가",ruleAdd:"# 룰",rulePh:"룰 이름 (예: CoC6)",ruleDel:"태그 지우기",unit:"명",most:"MOST",
   scenPh:"시나리오명",pcPh:"PC 이름",addRow:"+ 라인 추가",addEtc:"+ ETC 추가",delRow:"라인 삭제",delSlot:"칸 삭제",recrop:"다시 자르기",
   resetQ:"한 번 더 누르면 초기화",exporting:"만드는 중…",
   work:"작업",image:"이미지 저장",undo:"되돌리기 (Ctrl+Z)",redo:"다시 실행 (Ctrl+Y)",
@@ -243,7 +241,7 @@ const TX={
   tip:"枠をクリックまたは画像をドロップでアップロード · 画像はドラッグで移動 · 文字はクリックで編集",
   crop:"画像トリミング",cropHint:"ドラッグで位置、スライダー（またはホイール）でサイズを調整できます。",
   cancel:"キャンセル",ok:"決定",saved:"画像ができました",savedHint:"ダウンロードされない場合は、画像を長押しまたは右クリックで保存してください。",close:"閉じる",
-  band:"TRPG・4PLシナリオ",sub:"どのHOが一番多いかな？",addSlot:"+ 枠を追加",ruleAdd:"# ルール",rulePh:"ルール名を入力",ruleDel:"タグを消す",unit:"人",most:"MOST",
+  band:"TRPG・4PLシナリオ",sub:"どのHOが一番多いかな？",addSlot:"+ 枠を追加",ruleAdd:"# ルール",rulePh:"ルール名（例：CoC6）",ruleDel:"タグを消す",unit:"人",most:"MOST",
   scenPh:"シナリオ名",pcPh:"PC名",addRow:"+ ライン追加",addEtc:"+ ETC追加",delRow:"ライン削除",delSlot:"枠を削除",recrop:"再トリミング",
   resetQ:"もう一度押すとリセット",exporting:"作成中…",
   work:"作業",image:"画像を保存",undo:"元に戻す (Ctrl+Z)",redo:"やり直す (Ctrl+Y)",
@@ -325,31 +323,21 @@ function updateTally(){
   });
 }
 /* ---- 룰 태그 ---- */
-const RULES={ko:["CoC6","CoC7","인세인","에모크로아","마다미스","DX3rd","SW2.5","네크로니카"],
-             ja:["CoC6","CoC7","インセイン","エモクロア","マダミス","DX3rd","SW2.5","ネクロニカ"]};
-// 같은 룰은 항상 같은 색이 되도록 이름으로 색을 고름 [배경, 글자]
-const RULE_COLORS=[["#ffd6de","#7a2e40"],["#ffe3c9","#7a4518"],["#fff1b8","#5c4a00"],["#d4f3e4","#1f5c44"],
-                   ["#d6ebfb","#1f4a6b"],["#e6dcfb","#43306e"],["#f9d9f1","#6b2a5e"],["#e4e4e4","#333333"]];
-function ruleColor(name){let h=0;for(const ch of name.trim().toLowerCase())h=(h*31+ch.codePointAt(0))>>>0;return RULE_COLORS[h%RULE_COLORS.length]}
 function ruleTag(rule,ri,si){
   if(!rule)return`<button class="rule add edit-only" data-act="rule" data-ri="${ri}" data-si="${si}">${t("ruleAdd")}</button>`;
-  const[bg,fg]=ruleColor(rule);
-  return`<button class="rule" data-act="rule" data-ri="${ri}" data-si="${si}" style="background:${bg};color:${fg}" title="${esc(rule)}">${esc(rule)}</button>`;
+  return`<button class="rule" data-act="rule" data-ri="${ri}" data-si="${si}" title="${esc(rule)}">${esc(rule)}</button>`;
 }
 let rulePop=null;
 function closeRulePop(){if(rulePop){rulePop.remove();rulePop=null}}
 function openRulePop(btn,ri,si){
   closeRulePop();
   const cur=S.rows[ri].slots[si].rule;
-  const used=[...new Set(S.rows.flatMap(r=>r.slots.map(x=>x.rule)).filter(Boolean))];
-  const list=[...new Set([...RULES[S.lang],...used])];
   const el=document.createElement("div");el.className="rulepop";
-  el.innerHTML=`<div class="presets">${list.map(r=>{const[bg,fg]=ruleColor(r);return`<button type="button" data-rule="${esc(r)}" style="background:${bg};color:${fg}">${esc(r)}</button>`}).join("")}</div>
-    <form><input id="ruleInput" maxlength="20" placeholder="${esc(t("rulePh"))}" value="${esc(cur)}"><button class="btn primary" type="submit">OK</button></form>
+  el.innerHTML=`<form><input id="ruleInput" maxlength="20" placeholder="${esc(t("rulePh"))}" value="${esc(cur)}"><button class="btn primary" type="submit">OK</button></form>
     ${cur?`<button type="button" class="del">${t("ruleDel")}</button>`:""}`;
   document.body.appendChild(el);rulePop=el;
   const set=v=>{v=v.trim();closeRulePop();if(v===cur)return;remember();S.rows[ri].slots[si].rule=v;render()};
-  el.addEventListener("click",e=>{const b=e.target.closest("[data-rule]");if(b)set(b.dataset.rule);else if(e.target.closest(".del"))set("")});
+  el.addEventListener("click",e=>{if(e.target.closest(".del"))set("")});
   el.querySelector("form").addEventListener("submit",e=>{e.preventDefault();set(el.querySelector("input").value)});
   const r=btn.getBoundingClientRect(),w=el.offsetWidth,h=el.offsetHeight;
   el.style.left=Math.max(8,Math.min(r.left,innerWidth-w-8))+"px";
