@@ -104,7 +104,9 @@ body.locked .bar,body.locked .tip,body.locked .scroller{display:none}
 .tab .l1{margin-right:-6px;min-width:.5em}
 .tab .ed:empty::before{color:currentColor;opacity:.45}
 .tab .cnt{font-size:13px;font-weight:700;opacity:.85;font-variant-numeric:tabular-nums}
-.tab .most{font-size:11px;font-weight:900;letter-spacing:.06em;background:var(--paper);color:var(--deep);border-radius:999px;padding:1px 8px}
+/* 대문자만 있는 배지: 글자 박스를 대문자 높이로 잘라 위아래를 같게, 마지막 글자 뒤 자간만큼 오른쪽 여백을 줄여 좌우를 같게 */
+.tab .most{font-size:11px;font-weight:900;letter-spacing:.06em;background:var(--paper);color:var(--deep);border-radius:999px;
+  line-height:1;padding:5px calc(8px - .06em) 5px 8px;text-box:trim-both cap alphabetic}
 .cells{background:var(--soft);border-radius:0 14px 14px 14px;padding:18px 16px 14px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:18px 12px;align-items:start}
 .cell{display:flex;flex-direction:column;gap:3px;align-items:stretch;position:relative;min-width:0}
 .pic{width:100%;aspect-ratio:1;background:var(--paper);border-radius:12px;overflow:hidden;cursor:pointer;display:flex;align-items:center;justify-content:center;
