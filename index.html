@@ -28,6 +28,13 @@ button,input{font-family:inherit}
 .group>span{font-size:12px;letter-spacing:.04em;color:#8a8190}
 .sw{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--ui-line);cursor:pointer;padding:0}
 .sw[aria-pressed=true]{box-shadow:0 0 0 2px var(--ui-ink)}
+.sw.custom{position:relative;overflow:hidden;background:conic-gradient(#f4a7b9,#f7e08a,#a8e6cf,#a7d3f4,#c9b6f2,#f4a7b9)}
+.sw.custom input{position:absolute;inset:-6px;width:40px;height:40px;opacity:0;cursor:pointer;border:0;padding:0}
+.btn:disabled{opacity:.4;cursor:default}
+.check{display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer;white-space:nowrap}
+.check input{accent-color:var(--deep);width:16px;height:16px;margin:0}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ui-ink);color:#fff;font-size:13px;line-height:1.5;
+  padding:10px 18px;border-radius:12px;z-index:20;max-width:calc(100% - 32px);text-align:center}
 .btn{border:1px solid var(--ui-line);background:#fff;border-radius:999px;padding:6px 14px;cursor:pointer;font-size:13px;
   color:var(--ui-ink);white-space:nowrap;line-height:1.4}
 .btn.on,.btn.primary{background:var(--main);border-color:var(--main);color:var(--on-main);font-weight:700}
@@ -82,7 +89,16 @@ button,input{font-family:inherit}
   .cell .mini,.tab .mini{opacity:0;transition:opacity .15s}
   .cell:hover .mini,.tab:hover .mini,.mini:focus-visible{opacity:1}
 }
+.pic[draggable=true]{cursor:grab}
+.cell.dragging{opacity:.4}
+.cell.over .pic,.cells.over{outline:2px dashed var(--deep);outline-offset:3px}
 .addrow{display:flex;gap:8px;margin:0 0 20px}
+/* 세로형 (휴대폰 공유용) */
+#sheet.vert{width:640px;padding:32px 28px 28px}
+.vert .head{flex-direction:column;align-items:stretch;gap:16px}
+.vert .owner{width:auto;padding:10px 18px}
+.vert .title{font-size:32px}
+.vert .cells{grid-template-columns:repeat(4,minmax(0,1fr))}
 .foot{display:flex;justify-content:flex-end;margin-top:8px;font-size:11px;letter-spacing:.08em;color:var(--deep);opacity:.7}
 
 /* export: hide edit UI and placeholders */
@@ -90,6 +106,7 @@ button,input{font-family:inherit}
 .exporting .pic.empty{color:transparent}
 .exporting .ed:empty::before{content:""}
 .exporting .ed:hover{background:none}
+.exporting.hide-empty .cell.is-empty,.exporting.hide-empty .row.is-empty{display:none}
 
 /* ---- modals ---- */
 .modal{position:fixed;inset:0;background:rgba(40,30,45,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
@@ -106,20 +123,28 @@ button,input{font-family:inherit}
 
 <div class="bar">
   <h1 data-t="app"></h1>
-  <div class="group"><span data-t="theme"></span><div class="group" id="swatches"></div></div>
+  <div class="group"><span data-t="theme"></span><div class="group" id="swatches"></div>
+    <label class="sw custom" id="customSw"><input type="color" id="customColor" value="#f4a7b9"></label></div>
   <div class="group"><span data-t="lang"></span>
     <button class="btn" data-lang="ko">한국어</button><button class="btn" data-lang="ja">日本語</button></div>
-  <div class="group">
+  <div class="group"><span data-t="layout"></span>
+    <button class="btn" data-layout="h" data-t="horiz"></button><button class="btn" data-layout="v" data-t="vert"></button></div>
+  <div class="group"><span data-t="work"></span>
+    <button class="btn" id="undoBtn" data-t="undo"></button><button class="btn" id="redoBtn" data-t="redo"></button>
+    <button class="btn" id="saveProj" data-t="saveProj"></button><button class="btn" id="loadProj" data-t="loadProj"></button>
+    <button class="btn" id="resetBtn" data-t="reset"></button></div>
+  <div class="group"><span data-t="image"></span>
+    <label class="check"><input type="checkbox" id="hideEmpty"><span data-t="hideEmpty"></span></label>
     <button class="btn primary" id="savePng" data-t="png"></button>
-    <button class="btn primary" id="saveJpg" data-t="jpg"></button>
-    <button class="btn" id="resetBtn" data-t="reset"></button>
-  </div>
+    <button class="btn primary" id="saveJpg" data-t="jpg"></button></div>
 </div>
 <p class="tip" data-t="tip"></p>
 
 <div class="scroller"><div id="sheet"></div></div>
 
 <input type="file" id="file" accept="image/*" hidden>
+<input type="file" id="projFile" accept=".json,application/json" hidden>
+<div class="toast" id="toast" role="status" hidden></div>
 
 <div class="modal" id="cropModal" hidden>
   <div class="box">
@@ -153,40 +178,91 @@ const THEMES={
 };
 const TX={
  ko:{app:"HO 메이커",theme:"테마",lang:"언어",png:"PNG 저장",jpg:"JPG 저장",reset:"초기화",
-  tip:"사진 칸을 누르면 업로드, ✂ 버튼으로 다시 자르기. 글자는 모두 눌러서 수정할 수 있어요.",
+  tip:"사진 칸을 누르거나 파일을 끌어다 놓으면 업로드, ✂로 다시 자르기. 사진은 끌어서 순서·라인을 옮길 수 있고, 글자는 눌러서 수정해요. Ctrl+Z로 되돌리기.",
   crop:"사진 자르기",cropHint:"드래그로 위치를, 슬라이더(또는 마우스 휠)로 크기를 조절하세요.",
   cancel:"취소",ok:"적용",saved:"이미지를 만들었어요",savedHint:"다운로드가 안 되면 이미지를 길게 누르거나 우클릭해서 저장하세요.",close:"닫기",
   band:"TRPG · 4PL 시나리오",sub:"어떤 HO를 제일 많이 했을까?",owner:"PL 이름",ownerPh:"이름 입력",addSlot:"+ 칸 추가",unit:"명",most:"MOST",
   scenPh:"시나리오명",pcPh:"PC 이름",addRow:"+ 라인 추가",addEtc:"+ ETC 추가",delRow:"라인 삭제",delSlot:"칸 삭제",recrop:"다시 자르기",
-  resetQ:"한 번 더 누르면 초기화",exporting:"만드는 중…"},
+  resetQ:"한 번 더 누르면 초기화",exporting:"만드는 중…",
+  layout:"배치",horiz:"가로형",vert:"세로형",work:"작업",image:"이미지",undo:"↶ 되돌리기",redo:"↷ 다시",
+  saveProj:"작업 저장",loadProj:"불러오기",hideEmpty:"빈 칸 빼고 저장",custom:"직접 고르기",
+  loaded:"작업을 불러왔어요.",projSaved:"작업 파일을 저장했어요. 나중에 '불러오기'로 이어서 할 수 있어요.",
+  loadErr:"HO 메이커 작업 파일이 아니라서 불러오지 못했어요.",
+  quota:"브라우저 저장 공간이 가득 찼어요. '작업 저장'으로 파일에 보관해 주세요.",notImage:"이미지 파일만 올릴 수 있어요."},
  ja:{app:"HOメーカー",theme:"テーマ",lang:"言語",png:"PNG保存",jpg:"JPG保存",reset:"リセット",
-  tip:"枠をクリックで画像アップロード、✂ボタンで再トリミング。文字はすべてクリックで編集できます。",
+  tip:"枠をクリックまたはファイルをドロップで画像アップロード、✂で再トリミング。画像はドラッグで並べ替え・ライン移動ができ、文字はクリックで編集できます。Ctrl+Zで元に戻す。",
   crop:"画像トリミング",cropHint:"ドラッグで位置、スライダー（またはホイール）でサイズを調整できます。",
   cancel:"キャンセル",ok:"決定",saved:"画像ができました",savedHint:"ダウンロードされない場合は、画像を長押しまたは右クリックで保存してください。",close:"閉じる",
   band:"TRPG・4PLシナリオ",sub:"どのHOが一番多いかな？",owner:"PLネーム",ownerPh:"名前を入力",addSlot:"+ 枠を追加",unit:"人",most:"MOST",
   scenPh:"シナリオ名",pcPh:"PC名",addRow:"+ ライン追加",addEtc:"+ ETC追加",delRow:"ライン削除",delSlot:"枠を削除",recrop:"再トリミング",
-  resetQ:"もう一度押すとリセット",exporting:"作成中…"}
+  resetQ:"もう一度押すとリセット",exporting:"作成中…",
+  layout:"レイアウト",horiz:"横長",vert:"縦長",work:"作業",image:"画像",undo:"↶ 元に戻す",redo:"↷ やり直す",
+  saveProj:"作業を保存",loadProj:"読み込む",hideEmpty:"空欄を除いて保存",custom:"カスタム",
+  loaded:"作業を読み込みました。",projSaved:"作業ファイルを保存しました。「読み込む」で続きから編集できます。",
+  loadErr:"HOメーカーの作業ファイルではないため読み込めませんでした。",
+  quota:"ブラウザの保存容量がいっぱいです。「作業を保存」でファイルに保管してください。",notImage:"画像ファイルのみアップロードできます。"}
 };
 const emptySlot=()=>({img:"",scen:"",pc:""});
 const newRow=(a,b)=>({a,b,slots:Array.from({length:7},emptySlot)});
 const blank=()=>({lang:"ko",theme:"strawberry",band:null,sub:null,owner:"",rows:[1,2,3,4].map(n=>newRow("HO",String(n)))});
 
-let S; try{S=JSON.parse(localStorage.getItem("ho-maker"))}catch(e){}
-if(!S||!Array.isArray(S.rows))S=blank();
-if(!THEMES[S.theme])S.theme="strawberry";
-if(!TX[S.lang])S.lang="ko";
-S.rows.forEach(r=>r.slots.forEach(s=>{if(s.name!==undefined){if(!s.pc)s.pc=s.name;delete s.name}s.scen=s.scen||"";s.pc=s.pc||""}));
+const HEX=/^#[0-9a-f]{6}$/i;
+// 저장된 값이나 불러온 파일을 안전한 형태로 맞춤. 형식이 틀리면 null
+function normalize(o){
+  if(!o||typeof o!=="object"||!Array.isArray(o.rows))return null;
+  const str=v=>typeof v==="string"?v:"";
+  const okImg=v=>typeof v==="string"&&v.startsWith("data:image/")?v:"";
+  return{
+    lang:TX[o.lang]?o.lang:"ko",
+    theme:(THEMES[o.theme]||(o.theme==="custom"&&HEX.test(o.custom)))?o.theme:"strawberry",
+    custom:HEX.test(o.custom)?o.custom:"#f4a7b9",
+    layout:o.layout==="v"?"v":"h",
+    band:typeof o.band==="string"?o.band:null, sub:typeof o.sub==="string"?o.sub:null, owner:str(o.owner),
+    rows:o.rows.filter(r=>r&&Array.isArray(r.slots)).map(r=>({a:str(r.a),b:str(r.b),
+      slots:r.slots.filter(Boolean).map(x=>{
+        const sl={img:okImg(x.img),pc:str(x.pc)||str(x.name),scen:str(x.scen)};
+        if(okImg(x.src)){sl.src=x.src;if(x.crop&&isFinite(x.crop.z))sl.crop={z:+x.crop.z,x:+x.crop.x||0,y:+x.crop.y||0}}
+        return sl})}))
+  };
+}
+let S; try{S=normalize(JSON.parse(localStorage.getItem("ho-maker")))}catch(e){}
+if(!S)S=normalize(blank());
 
-const save=()=>{try{localStorage.setItem("ho-maker",JSON.stringify(S))}catch(e){}};
+let quotaWarned=false;
+const save=()=>{try{localStorage.setItem("ho-maker",JSON.stringify(S))}catch(e){if(!quotaWarned){quotaWarned=true;toast(t("quota"),6000)}}};
+let toastTimer;
+function toast(msg,ms=3000){const el=document.getElementById("toast");el.textContent=msg;el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.hidden=true},ms)}
+
+/* ---- 되돌리기 기록: 이미지 문자열은 복사하지 않고 공유해서 메모리를 아낌 ---- */
+const clone=o=>({...o,rows:o.rows.map(r=>({...r,slots:r.slots.map(x=>({...x,crop:x.crop&&{...x.crop}}))}))});
+const past=[],future=[];
+function remember(snap){past.push(snap||clone(S));if(past.length>50)past.shift();future.length=0;updateUndo()}
+function undo(){if(!past.length)return;future.push(clone(S));S=past.pop();render()}
+function redo(){if(!future.length)return;past.push(clone(S));S=future.pop();render()}
+function updateUndo(){document.getElementById("undoBtn").disabled=!past.length;document.getElementById("redoBtn").disabled=!future.length}
 const t=k=>TX[S.lang][k];
 const sheet=document.getElementById("sheet");
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
 const ed=(cls,attrs,val,ph)=>`<div class="ed ${cls}" contenteditable="true" spellcheck="false" ${attrs} data-ph="${esc(ph)}">${esc(val)}</div>`;
 
+// 직접 고른 색에서 연한 배경색·진한 글자색을 만들어냄
+function deriveTheme(hex){
+  const n=parseInt(hex.slice(1),16),R=n>>16,G=n>>8&255,B=n&255;
+  const r=R/255,g=G/255,b=B/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),l=(mx+mn)/2,dd=mx-mn;
+  let h=0,sat=0;
+  if(dd){sat=dd/(1-Math.abs(2*l-1));h=mx===r?((g-b)/dd)%6:mx===g?(b-r)/dd+2:(r-g)/dd+4;h=(h*60+360)%360}
+  const s2=Math.round(Math.min(sat*100,55));
+  const mix=c=>Math.round(c+(255-c)*.84);
+  const lum=(.2126*R+.7152*G+.0722*B)/255;
+  return[hex,`rgb(${mix(R)},${mix(G)},${mix(B)})`,`hsl(${Math.round(h)},${s2}%,28%)`,lum>.55?`hsl(${Math.round(h)},${s2}%,22%)`:"#ffffff"];
+}
+const themeColors=()=>S.theme==="custom"?deriveTheme(S.custom):THEMES[S.theme];
 function applyTheme(){
-  const [m,s,d,o]=THEMES[S.theme],r=document.documentElement.style;
+  const [m,s,d,o]=themeColors(),r=document.documentElement.style;
   r.setProperty("--main",m);r.setProperty("--soft",s);r.setProperty("--deep",d);r.setProperty("--on-main",o);
-  document.querySelectorAll(".sw").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.th===S.theme)));
+  document.querySelectorAll(".sw[data-th]").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.th===S.theme)));
+  const cs=document.getElementById("customSw");cs.setAttribute("aria-pressed",String(S.theme==="custom"));cs.title=t("custom");
+  document.getElementById("customColor").value=S.custom;
 }
 // 사진이나 PC 이름이 들어간 칸만 셈
 function updateTally(){
@@ -205,6 +281,9 @@ function render(){
   document.title=t("app");
   document.querySelectorAll("[data-t]").forEach(e=>e.textContent=t(e.dataset.t));
   document.querySelectorAll("[data-lang]").forEach(b=>b.classList.toggle("on",b.dataset.lang===S.lang));
+  document.querySelectorAll("[data-layout]").forEach(b=>b.classList.toggle("on",b.dataset.layout===S.layout));
+  sheet.classList.toggle("vert",S.layout==="v");
+  updateUndo();
   sheet.innerHTML=`
   <div class="head">
     <div class="head-l">
@@ -225,9 +304,9 @@ function render(){
     </div>
     <button class="btn edit-only" data-act="addslot" data-ri="${ri}">${t("addSlot")}</button>
     </div>
-    <div class="cells">
-      ${r.slots.map((s,si)=>`<div class="cell">
-        <div class="pic ${s.img?"":"empty"}" data-act="upload" data-ri="${ri}" data-si="${si}">${s.img?`<img src="${s.img}" alt="">`:"+"}</div>
+    <div class="cells" data-ri="${ri}">
+      ${r.slots.map((s,si)=>`<div class="cell" data-ri="${ri}" data-si="${si}">
+        <div class="pic ${s.img?"":"empty"}" data-act="upload" data-ri="${ri}" data-si="${si}" draggable="${!!(s.img||s.pc||s.scen)}">${s.img?`<img src="${s.img}" alt="">`:"+"}</div>
         ${ed("cap pc",`data-ri="${ri}" data-si="${si}" data-s="pc"`,s.pc,t("pcPh"))}
         ${ed("cap scen",`data-ri="${ri}" data-si="${si}" data-s="scen"`,s.scen,t("scenPh"))}
         <button class="mini del edit-only" data-act="delslot" data-ri="${ri}" data-si="${si}" title="${t("delSlot")}" aria-label="${t("delSlot")}">✕</button>
@@ -241,9 +320,12 @@ function render(){
   save();
 }
 
-/* text editing */
+/* text editing: 글자를 고치기 시작할 때 한 번만 기록 */
+let editSnap=null;
+sheet.addEventListener("focusin",e=>{if(e.target.closest(".ed"))editSnap=clone(S)});
 sheet.addEventListener("input",e=>{
   const el=e.target.closest(".ed");if(!el)return;
+  if(editSnap){remember(editSnap);editSnap=null}
   let v=el.textContent.replace(/\n/g," ");
   if(!v.trim()&&el.innerHTML!==""){el.innerHTML="";v=""}
   const d=el.dataset;
@@ -266,6 +348,7 @@ sheet.addEventListener("click",e=>{
   const ri=+b.dataset.ri,si=+b.dataset.si,act=b.dataset.act;
   if(act==="upload"){target={ri,si};fileIn.value="";fileIn.click();return}
   if(act==="recrop"){target={ri,si};const s=S.rows[ri].slots[si];openCrop(s.src||s.img,s.src?s.crop:null);return}
+  remember();
   if(act==="delslot")S.rows[ri].slots.splice(si,1);
   if(act==="addslot")S.rows[ri].slots.push(emptySlot());
   if(act==="delrow")S.rows.splice(ri,1);
@@ -277,26 +360,71 @@ sheet.addEventListener("click",e=>{
 /* theme / language / reset */
 const sw=document.getElementById("swatches");
 Object.entries(THEMES).forEach(([k,[m]])=>{const b=document.createElement("button");b.className="sw";b.dataset.th=k;b.title=k;b.setAttribute("aria-label",k);b.style.background=m;
-  b.onclick=()=>{S.theme=k;applyTheme();save()};sw.appendChild(b)});
+  b.onclick=()=>{if(S.theme===k)return;remember();S.theme=k;applyTheme();save()};sw.appendChild(b)});
+const cc=document.getElementById("customColor");
+cc.addEventListener("click",()=>{if(S.theme!=="custom"){remember();S.theme="custom";applyTheme();save()}});
+cc.addEventListener("input",()=>{S.theme="custom";S.custom=cc.value;applyTheme()});
+cc.addEventListener("change",()=>{S.custom=cc.value;save()});
+document.querySelectorAll("[data-layout]").forEach(b=>b.onclick=()=>{if(S.layout===b.dataset.layout)return;remember();S.layout=b.dataset.layout;render()});
 document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{
   // 기본 문구를 그대로 쓰고 있었다면 새 언어의 기본 문구로 바꿈
   const old=TX[S.lang];if(S.band===old.band)S.band=null;if(S.sub===old.sub)S.sub=null;
-  S.lang=b.dataset.lang;render()});
+  if(S.lang===b.dataset.lang)return;remember();S.lang=b.dataset.lang;render()});
 let resetArm=0;const rb=document.getElementById("resetBtn");
 rb.onclick=()=>{
-  if(Date.now()-resetArm<4000){const l=S.lang,th=S.theme;S=blank();S.lang=l;S.theme=th;resetArm=0;render()}
+  if(Date.now()-resetArm<4000){remember();const{lang,theme,custom,layout}=S;S={...normalize(blank()),lang,theme,custom,layout};resetArm=0;render()}
   else{resetArm=Date.now();rb.textContent=t("resetQ");setTimeout(()=>{rb.textContent=t("reset")},4000)}
 };
 
 /* ---- upload + crop ---- */
 const fileIn=document.getElementById("file"),modal=document.getElementById("cropModal"),cv=document.getElementById("cropCv"),ctx=cv.getContext("2d"),zoom=document.getElementById("zoom");
 let target=null,img=null,C={z:1,x:0,y:0},pendingSrc=null;
-fileIn.onchange=()=>{
-  const f=fileIn.files[0];if(!f)return;
+function loadImageFile(f){
+  if(!f||!f.type.startsWith("image/")){toast(t("notImage"));return}
   const r=new FileReader();
-  r.onload=()=>shrink(r.result,1400).then(src=>{pendingSrc=src;openCrop(src,null)});
+  r.onload=()=>shrink(r.result,1400).then(src=>{pendingSrc=src;openCrop(src,null)},()=>toast(t("notImage")));
   r.readAsDataURL(f);
-};
+}
+fileIn.onchange=()=>{if(fileIn.files[0])loadImageFile(fileIn.files[0])};
+
+/* ---- 끌어다 놓기: 파일 → 사진 칸 / 사진 칸 → 다른 위치 ---- */
+let dragFrom=null;
+const hasFiles=e=>!!e.dataTransfer&&[...e.dataTransfer.types].includes("Files");
+const clearOver=()=>sheet.querySelectorAll(".over").forEach(x=>x.classList.remove("over"));
+sheet.addEventListener("dragstart",e=>{
+  const p=e.target.closest&&e.target.closest(".pic[draggable=true]");if(!p)return;
+  dragFrom={ri:+p.dataset.ri,si:+p.dataset.si};
+  e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("text/plain","ho-slot");
+  p.closest(".cell").classList.add("dragging");
+});
+sheet.addEventListener("dragend",()=>{dragFrom=null;clearOver();sheet.querySelectorAll(".dragging").forEach(x=>x.classList.remove("dragging"))});
+function dropTarget(e){
+  const c=e.target.closest(".cell[data-si]");
+  if(hasFiles(e))return c?{el:c,ri:+c.dataset.ri,si:+c.dataset.si}:null;
+  if(!dragFrom)return null;
+  if(c)return{el:c,ri:+c.dataset.ri,si:+c.dataset.si};
+  const g=e.target.closest(".cells");
+  return g?{el:g,ri:+g.dataset.ri,si:S.rows[+g.dataset.ri].slots.length}:null;
+}
+sheet.addEventListener("dragover",e=>{
+  const d=dropTarget(e);if(!d)return;
+  e.preventDefault();e.dataTransfer.dropEffect=hasFiles(e)?"copy":"move";
+  if(!d.el.classList.contains("over")){clearOver();d.el.classList.add("over")}
+});
+sheet.addEventListener("dragleave",e=>{if(!sheet.contains(e.relatedTarget))clearOver()});
+sheet.addEventListener("drop",e=>{
+  const d=dropTarget(e);clearOver();if(!d)return;e.preventDefault();
+  if(hasFiles(e)){target={ri:d.ri,si:d.si};loadImageFile(e.dataTransfer.files[0]);return}
+  const f=dragFrom;dragFrom=null;
+  if(f.ri===d.ri&&f.si===d.si)return;
+  remember();
+  const item=S.rows[f.ri].slots.splice(f.si,1)[0];
+  S.rows[d.ri].slots.splice(Math.min(d.si,S.rows[d.ri].slots.length),0,item);
+  render();
+});
+// 칸 밖에 파일을 떨어뜨려도 브라우저가 파일을 열어버리지 않게
+window.addEventListener("dragover",e=>{if(hasFiles(e))e.preventDefault()});
+window.addEventListener("drop",e=>{if(hasFiles(e))e.preventDefault()});
 function shrink(src,max){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height));
   const c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);
   const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(i,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",.9))};i.onerror=rej;i.src=src})}
@@ -317,6 +445,7 @@ document.getElementById("cropOk").onclick=()=>{
   const o=document.createElement("canvas");o.width=o.height=400;
   const{w,h}=clamp(),k=400/cv.width,g=o.getContext("2d");
   g.fillStyle="#fff";g.fillRect(0,0,400,400);g.drawImage(img,C.x*k,C.y*k,w*k,h*k);
+  remember();
   const s=S.rows[target.ri].slots[target.si];
   s.img=o.toDataURL("image/jpeg",.92);s.src=pendingSrc||s.src||img.src;s.crop={...C};
   closeCrop();render();
@@ -327,23 +456,60 @@ async function exportImg(type){
   if(typeof html2canvas!=="function"){alert("html2canvas load failed");return}
   const btn=document.getElementById(type==="png"?"savePng":"saveJpg");btn.textContent=t("exporting");btn.disabled=true;
   document.activeElement&&document.activeElement.blur();
+  const filled=x=>!!(x.img||x.pc.trim()||x.scen.trim());
+  sheet.querySelectorAll(".cell[data-si]").forEach(c=>c.classList.toggle("is-empty",!filled(S.rows[c.dataset.ri].slots[c.dataset.si])));
+  sheet.querySelectorAll(".row").forEach((r,i)=>r.classList.toggle("is-empty",!S.rows[i].slots.some(filled)));
+  sheet.classList.toggle("hide-empty",document.getElementById("hideEmpty").checked);
   sheet.classList.add("exporting");
   try{
     if(document.fonts&&document.fonts.ready)await document.fonts.ready;
     const c=await html2canvas(sheet,{scale:2,backgroundColor:"#fffafb",useCORS:true,
       windowWidth:sheet.scrollWidth+80,scrollX:0,scrollY:-window.scrollY});
     const url=c.toDataURL(type==="png"?"image/png":"image/jpeg",.95);
-    const name=`HO_${(S.owner||"sheet").replace(/[\\/:*?"<>|]/g,"").trim()||"sheet"}.${type}`;
+    const name=`HO_${safeName()}.${type}`;
     const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
     document.getElementById("result").innerHTML=`<img src="${url}" alt="">`;
     document.getElementById("resultModal").hidden=false;
   }finally{
-    sheet.classList.remove("exporting");btn.disabled=false;btn.textContent=t(type);
+    sheet.classList.remove("exporting","hide-empty");btn.disabled=false;btn.textContent=t(type);
   }
 }
 document.getElementById("savePng").onclick=()=>exportImg("png");
 document.getElementById("saveJpg").onclick=()=>exportImg("jpg");
 document.getElementById("resultClose").onclick=()=>{document.getElementById("resultModal").hidden=true};
+
+/* ---- 작업 파일 저장/불러오기 ---- */
+const safeName=()=>(S.owner||"").replace(/[\\/:*?"<>|]/g,"").trim()||"sheet";
+document.getElementById("saveProj").onclick=()=>{
+  const blob=new Blob([JSON.stringify({app:"ho-maker",version:1,savedAt:new Date().toISOString(),state:S})],{type:"application/json"});
+  const url=URL.createObjectURL(blob),a=document.createElement("a");
+  a.href=url;a.download=`HO_${safeName()}.homaker.json`;
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  toast(t("projSaved"));
+};
+const projFile=document.getElementById("projFile");
+document.getElementById("loadProj").onclick=()=>{projFile.value="";projFile.click()};
+projFile.onchange=()=>{
+  const f=projFile.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    let n=null;try{const j=JSON.parse(r.result);n=normalize(j&&j.app==="ho-maker"?j.state:null)}catch(e){}
+    if(!n){toast(t("loadErr"));return}
+    remember();S=n;render();toast(t("loaded"));
+  };
+  r.readAsText(f);
+};
+
+/* ---- 단축키: 글자 입력 중에는 브라우저 기본 되돌리기를 씀 ---- */
+document.getElementById("undoBtn").onclick=undo;
+document.getElementById("redoBtn").onclick=redo;
+document.addEventListener("keydown",e=>{
+  if(!(e.ctrlKey||e.metaKey)||e.altKey)return;
+  if(e.target.closest&&e.target.closest(".ed,input"))return;
+  const k=e.key.toLowerCase();
+  if(k==="z"&&!e.shiftKey){e.preventDefault();undo()}
+  else if(k==="y"||(k==="z"&&e.shiftKey)){e.preventDefault();redo()}
+});
 
 render();
 </script>
