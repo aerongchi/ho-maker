@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HO 메이커</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+:root{
+  --main:#f4a7b9; --soft:#fde4ea; --deep:#7a3b4c; --on-main:#7a3b4c; --paper:#fffafb;
+  --ui-bg:#f7f5f8; --ui-ink:#3a3340; --ui-line:#ddd6e2; --ph:#b9b0bd;
+  --font:"Noto Sans KR","Noto Sans JP","Apple SD Gothic Neo","Malgun Gothic","Hiragino Sans","Yu Gothic",sans-serif;
+}
+html:lang(ja){--font:"Noto Sans JP","Noto Sans KR","Hiragino Sans","Yu Gothic","Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--ui-bg);color:var(--ui-ink);font-family:var(--font);padding:16px}
+button,input{font-family:inherit}
+
+/* ---- toolbar ---- */
+.bar{max-width:1040px;margin:0 auto 16px;display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;
+  background:#fff;border:1px solid var(--ui-line);border-radius:14px;padding:12px 16px}
+.bar h1{font-size:18px;margin:0;color:var(--deep);font-weight:900}
+.group{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.group>span{font-size:12px;letter-spacing:.04em;color:#8a8190}
+.sw{width:26px;height:26px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px var(--ui-line);cursor:pointer;padding:0}
+.sw[aria-pressed=true]{box-shadow:0 0 0 2px var(--ui-ink)}
+.btn{border:1px solid var(--ui-line);background:#fff;border-radius:999px;padding:6px 14px;cursor:pointer;font-size:13px;
+  color:var(--ui-ink);white-space:nowrap;line-height:1.4}
+.btn.on,.btn.primary{background:var(--main);border-color:var(--main);color:var(--on-main);font-weight:700}
+.btn:focus-visible,.sw:focus-visible,[contenteditable]:focus-visible{outline:2px solid var(--deep);outline-offset:2px}
+.scroller{overflow-x:auto;max-width:1040px;margin:0 auto}
+.tip{max-width:1040px;margin:0 auto 10px;font-size:12px;color:#8a8190}
+
+/* ---- editable text ---- */
+.ed{outline:none;cursor:text;overflow-wrap:anywhere;word-break:keep-all}
+.ed:empty::before{content:attr(data-ph);color:var(--ph)}
+.ed:hover{background:rgba(255,255,255,.35);border-radius:4px}
+
+/* ---- sheet ---- */
+#sheet{width:1000px;background:var(--paper);padding:48px 40px 40px;margin:0 auto;color:#222}
+.head{margin:0 40px 36px 88px}
+.topband{background:var(--main);color:var(--on-main);text-align:center;font-weight:900;font-size:26px;line-height:1.4;padding:10px 16px;border-radius:10px;min-height:56px}
+.titlewrap{display:flex;align-items:flex-end;gap:22px;margin-top:14px}
+.ho-big{font-weight:900;font-size:130px;line-height:1;color:var(--deep);flex:none;display:flex;flex-direction:column}
+.ho-big small{font-size:15px;font-weight:700;letter-spacing:.9em;line-height:1.2;padding-left:6px}
+.ho-big b{display:block;line-height:.82;letter-spacing:-.02em}
+.sub{font-weight:900;font-size:44px;line-height:1.25;color:#222;flex:1;min-width:0;padding-bottom:4px}
+.row{display:flex;gap:16px;margin-bottom:22px;align-items:stretch}
+.label{width:72px;flex:none;background:var(--main);color:var(--on-main);border-radius:10px;display:flex;flex-direction:column;
+  align-items:center;justify-content:center;font-weight:900;position:relative;padding:10px 4px;gap:2px;text-align:center}
+.label .l1{font-size:20px;line-height:1.1;min-width:100%}
+.label .l2{font-size:42px;line-height:1.05;min-width:100%}
+.label .l2.long{font-size:20px}
+.label .ed:empty::before{color:currentColor;opacity:.4}
+.cells{flex:1;min-width:0;background:var(--soft);border-radius:12px;padding:16px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:16px 10px;align-items:start}
+.cell{display:flex;flex-direction:column;gap:4px;align-items:stretch;position:relative;min-width:0}
+.pic{width:100%;aspect-ratio:1;background:#fff;border:3px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.08);border-radius:8px;overflow:hidden;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;color:#c9bfcc;font-size:28px;line-height:1}
+.pic img{width:100%;height:100%;object-fit:cover;display:block}
+.cap{text-align:center;line-height:1.3;min-height:1.3em}
+.cap.scen{font-size:10.5px;color:#6b6270;font-weight:700;margin-top:2px}
+.cap.pc{font-size:13px;font-weight:900;color:#222}
+.mini{position:absolute;top:-8px;width:22px;height:22px;border-radius:50%;border:none;
+  font-size:12px;line-height:22px;cursor:pointer;padding:0;text-align:center;font-family:Arial,sans-serif}
+.mini.del{right:-8px;background:var(--deep);color:#fff}
+.mini.crop{left:-8px;background:#fff;color:var(--deep);box-shadow:0 0 0 1px var(--ui-line)}
+.label .mini.del{right:-8px}
+.addcell .pic{border:2px dashed var(--main);background:transparent;box-shadow:none;color:var(--deep)}
+.addrow{display:flex;gap:8px;margin:0 0 24px 88px}
+.foot{display:flex;justify-content:flex-end;margin-top:30px}
+.fline{display:flex;align-items:baseline;gap:12px;border-bottom:3px solid var(--deep);width:440px;padding-bottom:6px}
+.fline b{font-size:18px;white-space:nowrap;color:var(--deep);font-weight:900}
+.fline .ed{flex:1;font-size:26px;font-weight:900;line-height:1.3;min-width:0}
+
+/* export: hide edit UI and placeholders */
+.exporting .edit-only{display:none!important}
+.exporting .pic.empty{color:transparent}
+.exporting .ed:empty::before{content:""}
+.exporting .ed:hover{background:none}
+
+/* ---- modals ---- */
+.modal{position:fixed;inset:0;background:rgba(40,30,45,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
+.box{background:#fff;border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:12px;width:360px;max-width:100%;max-height:100%;overflow:auto}
+.box h2{margin:0;font-size:16px;color:var(--ui-ink);font-weight:900}
+#cropCv{width:100%;aspect-ratio:1;border-radius:8px;background:#eee;touch-action:none;cursor:grab;display:block}
+.box .acts{display:flex;gap:8px;justify-content:flex-end}
+.box input[type=range]{width:100%;accent-color:var(--deep)}
+.hint{font-size:12px;color:#8a8190;margin:0;line-height:1.5}
+#result img{max-width:100%;border-radius:8px;display:block}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <h1 data-t="app"></h1>
+  <div class="group"><span data-t="theme"></span><div class="group" id="swatches"></div></div>
+  <div class="group"><span data-t="lang"></span>
+    <button class="btn" data-lang="ko">한국어</button><button class="btn" data-lang="ja">日本語</button></div>
+  <div class="group">
+    <button class="btn primary" id="savePng" data-t="png"></button>
+    <button class="btn primary" id="saveJpg" data-t="jpg"></button>
+    <button class="btn" id="resetBtn" data-t="reset"></button>
+  </div>
+</div>
+<p class="tip" data-t="tip"></p>
+
+<div class="scroller"><div id="sheet"></div></div>
+
+<input type="file" id="file" accept="image/*" hidden>
+
+<div class="modal" id="cropModal" hidden>
+  <div class="box">
+    <h2 data-t="crop"></h2>
+    <canvas id="cropCv" width="600" height="600"></canvas>
+    <p class="hint" data-t="cropHint"></p>
+    <input type="range" id="zoom" min="1" max="4" step="0.01" value="1">
+    <div class="acts">
+      <button class="btn" id="cropCancel" data-t="cancel"></button>
+      <button class="btn primary" id="cropOk" data-t="ok"></button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="resultModal" hidden>
+  <div class="box" style="width:520px">
+    <h2 data-t="saved"></h2>
+    <p class="hint" data-t="savedHint"></p>
+    <div id="result"></div>
+    <div class="acts"><button class="btn primary" id="resultClose" data-t="close"></button></div>
+  </div>
+</div>
+
+<script>
+// [메인색, 연한 배경색, 진한 글자색, 메인색 위 글자색]
+const THEMES={
+  strawberry:["#f4a7b9","#fde4ea","#7a3b4c","#6b2f40"], peach:["#ffc3a0","#fff0e5","#8a4a2b","#7a3d20"],
+  lemon:["#f7e08a","#fffbe3","#6e5a12","#5c4a08"],      mint:["#a8e6cf","#e8faf2","#2e6b55","#245a47"],
+  sky:["#a7d3f4","#e6f4fd","#2d5877","#234a66"],        lavender:["#c9b6f2","#f2ecfd","#4d3a7a","#3f2e6a"],
+  lilac:["#f0b5e4","#fdeaf9","#733a67","#632e58"],      mono:["#222222","#e6e6e6","#222222","#ffffff"]
+};
+const TX={
+ ko:{app:"HO 메이커",theme:"테마",lang:"언어",png:"PNG 저장",jpg:"JPG 저장",reset:"초기화",
+  tip:"사진 칸을 누르면 업로드, ✂ 버튼으로 다시 자르기. 글자는 모두 눌러서 수정할 수 있어요.",
+  crop:"사진 자르기",cropHint:"드래그로 위치를, 슬라이더(또는 마우스 휠)로 크기를 조절하세요.",
+  cancel:"취소",ok:"적용",saved:"이미지를 만들었어요",savedHint:"다운로드가 안 되면 이미지를 길게 누르거나 우클릭해서 저장하세요.",close:"닫기",
+  band:"TRPG 4PL 시나리오의",sub:"뭐가 많을까",kana:"핸드아웃",owner:"이름 :",
+  scenPh:"시나리오명",pcPh:"PC 이름",addRow:"+ 라인 추가",addEtc:"+ ETC 추가",delRow:"라인 삭제",delSlot:"칸 삭제",recrop:"다시 자르기",
+  resetQ:"한 번 더 누르면 초기화",exporting:"만드는 중…"},
+ ja:{app:"HOメーカー",theme:"テーマ",lang:"言語",png:"PNG保存",jpg:"JPG保存",reset:"リセット",
+  tip:"枠をクリックで画像アップロード、✂ボタンで再トリミング。文字はすべてクリックで編集できます。",
+  crop:"画像トリミング",cropHint:"ドラッグで位置、スライダー（またはホイール）でサイズを調整できます。",
+  cancel:"キャンセル",ok:"決定",saved:"画像ができました",savedHint:"ダウンロードされない場合は、画像を長押しまたは右クリックで保存してください。",close:"閉じる",
+  band:"TRPG 4PLシナリオの",sub:"どれが多いかな",kana:"ハンドアウト",owner:"おなまえ :",
+  scenPh:"シナリオ名",pcPh:"PC名",addRow:"+ ライン追加",addEtc:"+ ETC追加",delRow:"ライン削除",delSlot:"枠を削除",recrop:"再トリミング",
+  resetQ:"もう一度押すとリセット",exporting:"作成中…"}
+};
+const emptySlot=()=>({img:"",scen:"",pc:""});
+const newRow=(a,b)=>({a,b,slots:Array.from({length:7},emptySlot)});
+const blank=()=>({lang:"ko",theme:"strawberry",band:null,sub:null,owner:"",rows:[1,2,3,4].map(n=>newRow("HO",String(n)))});
+
+let S; try{S=JSON.parse(localStorage.getItem("ho-maker"))}catch(e){}
+if(!S||!Array.isArray(S.rows))S=blank();
+if(!THEMES[S.theme])S.theme="strawberry";
+if(!TX[S.lang])S.lang="ko";
+S.rows.forEach(r=>r.slots.forEach(s=>{if(s.name!==undefined){if(!s.pc)s.pc=s.name;delete s.name}s.scen=s.scen||"";s.pc=s.pc||""}));
+
+const save=()=>{try{localStorage.setItem("ho-maker",JSON.stringify(S))}catch(e){}};
+const t=k=>TX[S.lang][k];
+const sheet=document.getElementById("sheet");
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ed=(cls,attrs,val,ph)=>`<div class="ed ${cls}" contenteditable="true" spellcheck="false" ${attrs} data-ph="${esc(ph)}">${esc(val)}</div>`;
+
+function applyTheme(){
+  const [m,s,d,o]=THEMES[S.theme],r=document.documentElement.style;
+  r.setProperty("--main",m);r.setProperty("--soft",s);r.setProperty("--deep",d);r.setProperty("--on-main",o);
+  document.querySelectorAll(".sw").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.th===S.theme)));
+}
+function render(){
+  applyTheme();
+  document.documentElement.lang=S.lang;
+  document.title=t("app");
+  document.querySelectorAll("[data-t]").forEach(e=>e.textContent=t(e.dataset.t));
+  document.querySelectorAll("[data-lang]").forEach(b=>b.classList.toggle("on",b.dataset.lang===S.lang));
+  sheet.innerHTML=`
+  <div class="head">
+    ${ed("topband",'data-f="band"',S.band??t("band"),t("band"))}
+    <div class="titlewrap">
+      <div class="ho-big"><small>${t("kana")}</small><b>HO</b></div>
+      ${ed("sub",'data-f="sub"',S.sub??t("sub"),t("sub"))}
+    </div>
+  </div>
+  ${S.rows.map((r,ri)=>`
+  <div class="row">
+    <div class="label">
+      ${ed("l1",`data-ri="${ri}" data-k="a"`,r.a,"")}
+      ${ed("l2"+(r.b.length>2?" long":""),`data-ri="${ri}" data-k="b"`,r.b,"")}
+      <button class="mini del edit-only" data-act="delrow" data-ri="${ri}" title="${t("delRow")}" aria-label="${t("delRow")}">✕</button>
+    </div>
+    <div class="cells">
+      ${r.slots.map((s,si)=>`<div class="cell">
+        <div class="pic ${s.img?"":"empty"}" data-act="upload" data-ri="${ri}" data-si="${si}">${s.img?`<img src="${s.img}" alt="">`:"+"}</div>
+        ${ed("cap scen",`data-ri="${ri}" data-si="${si}" data-s="scen"`,s.scen,t("scenPh"))}
+        ${ed("cap pc",`data-ri="${ri}" data-si="${si}" data-s="pc"`,s.pc,t("pcPh"))}
+        <button class="mini del edit-only" data-act="delslot" data-ri="${ri}" data-si="${si}" title="${t("delSlot")}" aria-label="${t("delSlot")}">✕</button>
+        ${s.img?`<button class="mini crop edit-only" data-act="recrop" data-ri="${ri}" data-si="${si}" title="${t("recrop")}" aria-label="${t("recrop")}">✂</button>`:""}
+      </div>`).join("")}
+      <div class="cell addcell edit-only"><div class="pic" data-act="addslot" data-ri="${ri}">＋</div></div>
+    </div>
+  </div>`).join("")}
+  <div class="addrow edit-only"><button class="btn" data-act="addrow">${t("addRow")}</button><button class="btn" data-act="addetc">${t("addEtc")}</button></div>
+  <div class="foot"><div class="fline"><b>${t("owner")}</b>${ed("",'data-f="owner"',S.owner,"")}</div></div>`;
+  save();
+}
+
+/* text editing */
+sheet.addEventListener("input",e=>{
+  const el=e.target.closest(".ed");if(!el)return;
+  let v=el.textContent.replace(/\n/g," ");
+  if(!v.trim()&&el.innerHTML!==""){el.innerHTML="";v=""}
+  const d=el.dataset;
+  if(d.f)S[d.f]=v;
+  else if(d.k){S.rows[d.ri][d.k]=v;if(d.k==="b")el.classList.toggle("long",v.length>2)}
+  else if(d.s)S.rows[d.ri].slots[d.si][d.s]=v;
+  save();
+});
+sheet.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.closest(".ed")){e.preventDefault();e.target.blur()}});
+sheet.addEventListener("paste",e=>{
+  if(!e.target.closest(".ed"))return;e.preventDefault();
+  const txt=(e.clipboardData||window.clipboardData).getData("text").replace(/\s*\n\s*/g," ");
+  document.execCommand("insertText",false,txt);
+});
+
+/* buttons */
+sheet.addEventListener("click",e=>{
+  const b=e.target.closest("[data-act]");if(!b)return;
+  const ri=+b.dataset.ri,si=+b.dataset.si,act=b.dataset.act;
+  if(act==="upload"){target={ri,si};fileIn.value="";fileIn.click();return}
+  if(act==="recrop"){target={ri,si};const s=S.rows[ri].slots[si];openCrop(s.src||s.img,s.src?s.crop:null);return}
+  if(act==="delslot")S.rows[ri].slots.splice(si,1);
+  if(act==="addslot")S.rows[ri].slots.push(emptySlot());
+  if(act==="delrow")S.rows.splice(ri,1);
+  if(act==="addrow")S.rows.push(newRow("HO",String(S.rows.filter(r=>r.a==="HO").length+1)));
+  if(act==="addetc")S.rows.push(newRow("","ETC"));
+  render();
+});
+
+/* theme / language / reset */
+const sw=document.getElementById("swatches");
+Object.entries(THEMES).forEach(([k,[m]])=>{const b=document.createElement("button");b.className="sw";b.dataset.th=k;b.title=k;b.setAttribute("aria-label",k);b.style.background=m;
+  b.onclick=()=>{S.theme=k;applyTheme();save()};sw.appendChild(b)});
+document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{
+  // 기본 문구를 그대로 쓰고 있었다면 새 언어의 기본 문구로 바꿈
+  const old=TX[S.lang];if(S.band===old.band)S.band=null;if(S.sub===old.sub)S.sub=null;
+  S.lang=b.dataset.lang;render()});
+let resetArm=0;const rb=document.getElementById("resetBtn");
+rb.onclick=()=>{
+  if(Date.now()-resetArm<4000){const l=S.lang,th=S.theme;S=blank();S.lang=l;S.theme=th;resetArm=0;render()}
+  else{resetArm=Date.now();rb.textContent=t("resetQ");setTimeout(()=>{rb.textContent=t("reset")},4000)}
+};
+
+/* ---- upload + crop ---- */
+const fileIn=document.getElementById("file"),modal=document.getElementById("cropModal"),cv=document.getElementById("cropCv"),ctx=cv.getContext("2d"),zoom=document.getElementById("zoom");
+let target=null,img=null,C={z:1,x:0,y:0},pendingSrc=null;
+fileIn.onchange=()=>{
+  const f=fileIn.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>shrink(r.result,1400).then(src=>{pendingSrc=src;openCrop(src,null)});
+  r.readAsDataURL(f);
+};
+function shrink(src,max){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>{const k=Math.min(1,max/Math.max(i.width,i.height));
+  const c=document.createElement("canvas");c.width=Math.round(i.width*k);c.height=Math.round(i.height*k);
+  const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(i,0,0,c.width,c.height);res(c.toDataURL("image/jpeg",.9))};i.onerror=rej;i.src=src})}
+function openCrop(src,crop){img=new Image();img.onload=()=>{C=crop?{...crop}:{z:1,x:0,y:0};zoom.value=C.z;if(!crop)center();draw();modal.hidden=false};img.src=src}
+function center(){const{w,h}=size();C.x=(cv.width-w)/2;C.y=(cv.height-h)/2}
+function size(){const base=cv.width/Math.min(img.width,img.height)*C.z;return{w:img.width*base,h:img.height*base}}
+function clamp(){const{w,h}=size();C.x=Math.min(0,Math.max(cv.width-w,C.x));C.y=Math.min(0,Math.max(cv.height-h,C.y));return{w,h}}
+function draw(){const{w,h}=clamp();ctx.fillStyle="#fff";ctx.fillRect(0,0,cv.width,cv.height);ctx.drawImage(img,C.x,C.y,w,h)}
+zoom.oninput=()=>{const c=cv.width/2,o=C.z;C.z=+zoom.value;C.x=c-(c-C.x)*C.z/o;C.y=c-(c-C.y)*C.z/o;draw()};
+let drag=null;
+cv.onpointerdown=e=>{drag={x:e.clientX,y:e.clientY};cv.setPointerCapture(e.pointerId);cv.style.cursor="grabbing"};
+cv.onpointermove=e=>{if(!drag)return;const k=cv.width/cv.getBoundingClientRect().width;C.x+=(e.clientX-drag.x)*k;C.y+=(e.clientY-drag.y)*k;drag={x:e.clientX,y:e.clientY};draw()};
+cv.onpointerup=cv.onpointercancel=()=>{drag=null;cv.style.cursor=""};
+cv.addEventListener("wheel",e=>{e.preventDefault();zoom.value=Math.min(4,Math.max(1,C.z-e.deltaY*.002));zoom.oninput()},{passive:false});
+function closeCrop(){modal.hidden=true;pendingSrc=null}
+document.getElementById("cropCancel").onclick=closeCrop;
+document.getElementById("cropOk").onclick=()=>{
+  const o=document.createElement("canvas");o.width=o.height=400;
+  const{w,h}=clamp(),k=400/cv.width,g=o.getContext("2d");
+  g.fillStyle="#fff";g.fillRect(0,0,400,400);g.drawImage(img,C.x*k,C.y*k,w*k,h*k);
+  const s=S.rows[target.ri].slots[target.si];
+  s.img=o.toDataURL("image/jpeg",.92);s.src=pendingSrc||s.src||img.src;s.crop={...C};
+  closeCrop();render();
+};
+
+/* ---- export ---- */
+async function exportImg(type){
+  if(typeof html2canvas!=="function"){alert("html2canvas load failed");return}
+  const btn=document.getElementById(type==="png"?"savePng":"saveJpg");btn.textContent=t("exporting");btn.disabled=true;
+  document.activeElement&&document.activeElement.blur();
+  sheet.classList.add("exporting");
+  try{
+    if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+    const c=await html2canvas(sheet,{scale:2,backgroundColor:"#fffafb",useCORS:true,
+      windowWidth:sheet.scrollWidth+80,scrollX:0,scrollY:-window.scrollY});
+    const url=c.toDataURL(type==="png"?"image/png":"image/jpeg",.95);
+    const name=`HO_${(S.owner||"sheet").replace(/[\\/:*?"<>|]/g,"").trim()||"sheet"}.${type}`;
+    const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+    document.getElementById("result").innerHTML=`<img src="${url}" alt="">`;
+    document.getElementById("resultModal").hidden=false;
+  }finally{
+    sheet.classList.remove("exporting");btn.disabled=false;btn.textContent=t(type);
+  }
+}
+document.getElementById("savePng").onclick=()=>exportImg("png");
+document.getElementById("saveJpg").onclick=()=>exportImg("jpg");
+document.getElementById("resultClose").onclick=()=>{document.getElementById("resultModal").hidden=true};
+
+render();
+</script>
+</body>
+</html>
