@@ -10,7 +10,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root{
-  --main:#f4a7b9; --soft:#fde4ea; --deep:#7a3b4c; --on-main:#7a3b4c; --paper:#fffafb;
+  --main:#222222; --soft:#e6e6e6; --deep:#222222; --on-main:#ffffff; --paper:#fffafb;
   --ui-bg:#f7f5f8; --ui-ink:#3a3340; --ui-line:#ddd6e2; --ph:#b9b0bd;
   --font:"Noto Sans KR","Noto Sans JP","Apple SD Gothic Neo","Malgun Gothic","Hiragino Sans","Yu Gothic",sans-serif;
 }
@@ -242,7 +242,7 @@ const TX={
 };
 const emptySlot=()=>({img:"",scen:"",pc:""});
 const newRow=(a,b)=>({a,b,slots:Array.from({length:7},emptySlot)});
-const blank=()=>({lang:"ko",theme:"strawberry",band:null,sub:null,owner:"",rows:[1,2,3,4].map(n=>newRow("HO",String(n)))});
+const blank=()=>({lang:"ko",theme:"mono",band:null,sub:null,owner:"",rows:[1,2,3,4].map(n=>newRow("HO",String(n)))});
 
 const HEX=/^#[0-9a-f]{6}$/i;
 // 저장된 값이나 불러온 파일을 안전한 형태로 맞춤. 형식이 틀리면 null
@@ -252,7 +252,7 @@ function normalize(o){
   const okImg=v=>typeof v==="string"&&v.startsWith("data:image/")?v:"";
   return{
     lang:TX[o.lang]?o.lang:"ko",
-    theme:(THEMES[o.theme]||(o.theme==="custom"&&HEX.test(o.custom)))?o.theme:"strawberry",
+    theme:(THEMES[o.theme]||(o.theme==="custom"&&HEX.test(o.custom)))?o.theme:"mono",
     custom:HEX.test(o.custom)?o.custom:"#f4a7b9",
     band:typeof o.band==="string"?o.band:null, sub:typeof o.sub==="string"?o.sub:null, owner:str(o.owner),
     rows:o.rows.filter(r=>r&&Array.isArray(r.slots)).map(r=>({a:str(r.a),b:str(r.b),
