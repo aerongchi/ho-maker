@@ -11,7 +11,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root{
-  --main:#222222; --soft:#e6e6e6; --deep:#222222; --on-main:#ffffff; --paper:#fffafb;
+  --main:#222222; --soft:#e6e6e6; --deep:#222222; --on-main:#ffffff; --paper:#ffffff;
   --ui-bg:#f7f5f8; --ui-ink:#3a3340; --ui-line:#ddd6e2; --ph:#b9b0bd;
   --font:"Noto Sans KR","Noto Sans JP","Apple SD Gothic Neo","Malgun Gothic","Hiragino Sans","Yu Gothic",sans-serif;
 }
@@ -578,12 +578,12 @@ async function captureSheet(type){
   const mime=type==="png"?"image/png":"image/jpeg";
   if(window.htmlToImage){
     try{
-      const o={pixelRatio:2,backgroundColor:"#fffafb",width:sheet.offsetWidth,height:sheet.offsetHeight,style:{margin:"0"},quality:.95};
+      const o={pixelRatio:2,backgroundColor:"#ffffff",width:sheet.offsetWidth,height:sheet.offsetHeight,style:{margin:"0"},quality:.95};
       return type==="png"?await htmlToImage.toPng(sheet,o):await htmlToImage.toJpeg(sheet,o);
     }catch(err){console.warn("html-to-image failed, falling back",err)}
   }
   if(typeof html2canvas!=="function")throw new Error("no capture library");
-  const c=await html2canvas(sheet,{scale:2,backgroundColor:"#fffafb",useCORS:true,windowWidth:sheet.scrollWidth+80,scrollX:0,scrollY:-window.scrollY});
+  const c=await html2canvas(sheet,{scale:2,backgroundColor:"#ffffff",useCORS:true,windowWidth:sheet.scrollWidth+80,scrollX:0,scrollY:-window.scrollY});
   return c.toDataURL(mime,.95);
 }
 async function exportImg(type){
