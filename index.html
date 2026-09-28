@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Noto+Sans+JP:wght@400;700;900&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/html-to-image@1.11.11/dist/html-to-image.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
 :root{
@@ -21,7 +22,7 @@ body{margin:0;background:var(--ui-bg);color:var(--ui-ink);font-family:var(--font
 button,input{font-family:inherit}
 
 /* ---- toolbar ---- */
-.bar{max-width:1040px;margin:0 auto 10px;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;
+.bar{max-width:1000px;margin:0 auto 10px;display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;
   background:#fff;border:1px solid var(--ui-line);border-radius:16px;padding:10px 12px 10px 18px}
 .brand{font-size:17px;margin:0;color:var(--deep);font-weight:900;white-space:nowrap}
 .swatches{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
@@ -68,8 +69,10 @@ body.locked .bar,body.locked .tip,body.locked .scroller{display:none}
 .gate .err{color:#b03a4a}
 .gate .btn{padding:10px}
 .btn:focus-visible,.sw:focus-visible,[contenteditable]:focus-visible{outline:2px solid var(--deep);outline-offset:2px}
-.scroller{overflow-x:auto;max-width:1040px;margin:0 auto}
-.tip{max-width:1040px;margin:0 auto 10px;font-size:12px;color:#8a8190}
+.scroller{overflow-x:auto;max-width:1000px;margin:0 auto}
+.tip{max-width:1000px;margin:0 auto 14px;padding:0 4px;list-style:none;display:flex;flex-wrap:wrap;gap:6px 20px;font-size:12.5px;line-height:1.6;color:#6b6270}
+.tip li{display:flex;align-items:center;gap:7px}
+.tip b{font-size:11.5px;font-weight:700;color:var(--ui-ink);background:#fff;border:1px solid var(--ui-line);border-radius:6px;padding:0 7px}
 
 /* ---- editable text ---- */
 .ed{outline:none;cursor:text;overflow-wrap:anywhere;word-break:keep-all}
@@ -190,7 +193,7 @@ body.locked .bar,body.locked .tip,body.locked .scroller{display:none}
       </div></details>
   </div>
 </div>
-<p class="tip" data-t="tip"></p>
+<ul class="tip" id="guide"></ul>
 
 <div class="scroller"><div id="sheet"></div></div>
 
@@ -230,7 +233,7 @@ const THEMES={
 };
 const TX={
  ko:{app:"HO Maker",theme:"테마",lang:"언어",png:"PNG로 저장",jpg:"JPG로 저장",reset:"초기화",
-  tip:"칸을 누르거나 사진을 끌어다 놓으면 업로드 · 사진은 끌어서 자리 이동 · 글자는 눌러서 수정 · 사진 왼쪽 위 「# 룰」을 눌러 태그 추가",
+  guide:[["업로드","칸을 누르거나 사진을 끌어다 놓기"],["자리 이동","사진을 끌어서 옮기기"],["글자 수정","글자를 눌러서 바로 입력"],["룰 태그","사진 왼쪽 위 「# 룰」 누르기"]],
   crop:"사진 자르기",cropHint:"드래그로 위치를, 슬라이더(또는 마우스 휠)로 크기를 조절하세요.",
   cancel:"취소",ok:"적용",saved:"이미지를 만들었어요",savedHint:"다운로드가 안 되면 이미지를 길게 누르거나 우클릭해서 저장하세요.",close:"닫기",
   band:"TRPG · 4PL 시나리오",sub:"어떤 HO를 제일 많이 했을까?",addSlot:"+ 칸 추가",ruleAdd:"# 룰",rulePh:"룰 이름 (예: CoC7)",ruleColor:"태그 색",ruleTheme:"테마색 쓰기",ruleDel:"태그 지우기",unit:"명",most:"MOST",
@@ -240,9 +243,9 @@ const TX={
   saveProj:"작업 저장",loadProj:"불러오기",hideEmpty:"빈 칸 빼고 저장",custom:"직접 고르기",
   loaded:"작업을 불러왔어요.",projSaved:"작업 파일을 저장했어요. 나중에 '불러오기'로 이어서 할 수 있어요.",
   loadErr:"HO Maker 작업 파일이 아니라서 불러오지 못했어요.",
-  quota:"브라우저 저장 공간이 가득 찼어요. '작업 저장'으로 파일에 보관해 주세요.",notImage:"이미지 파일만 올릴 수 있어요."},
+  quota:"브라우저 저장 공간이 가득 찼어요. '작업 저장'으로 파일에 보관해 주세요.",notImage:"이미지 파일만 올릴 수 있어요.",exportErr:"이미지를 만들지 못했어요. 인터넷 연결을 확인하고 다시 눌러 주세요."},
  ja:{app:"HO Maker",theme:"テーマ",lang:"言語",png:"PNGで保存",jpg:"JPGで保存",reset:"リセット",
-  tip:"枠をクリックまたは画像をドロップでアップロード · 画像はドラッグで移動 · 文字はクリックで編集 · 画像左上の「# ルール」でタグを追加",
+  guide:[["アップロード","枠をクリック、または画像をドロップ"],["並べ替え","画像をドラッグして移動"],["文字の編集","文字をクリックして入力"],["ルールタグ","画像左上の「# ルール」をクリック"]],
   crop:"画像トリミング",cropHint:"ドラッグで位置、スライダー（またはホイール）でサイズを調整できます。",
   cancel:"キャンセル",ok:"決定",saved:"画像ができました",savedHint:"ダウンロードされない場合は、画像を長押しまたは右クリックで保存してください。",close:"閉じる",
   band:"TRPG・4PLシナリオ",sub:"どのHOが一番多いかな？",addSlot:"+ 枠を追加",ruleAdd:"# ルール",rulePh:"ルール名（例：CoC7）",ruleColor:"タグの色",ruleTheme:"テーマ色に戻す",ruleDel:"タグを消す",unit:"人",most:"MOST",
@@ -252,7 +255,7 @@ const TX={
   saveProj:"作業を保存",loadProj:"読み込む",hideEmpty:"空欄を除いて保存",custom:"カスタム",
   loaded:"作業を読み込みました。",projSaved:"作業ファイルを保存しました。「読み込む」で続きから編集できます。",
   loadErr:"HO Makerの作業ファイルではないため読み込めませんでした。",
-  quota:"ブラウザの保存容量がいっぱいです。「作業を保存」でファイルに保管してください。",notImage:"画像ファイルのみアップロードできます。"}
+  quota:"ブラウザの保存容量がいっぱいです。「作業を保存」でファイルに保管してください。",notImage:"画像ファイルのみアップロードできます。",exportErr:"画像を作成できませんでした。ネット接続を確認して、もう一度お試しください。"}
 };
 const emptySlot=()=>({img:"",scen:"",pc:"",rule:""});
 const newRow=(a,b)=>({a,b,slots:Array.from({length:7},emptySlot)});
@@ -371,6 +374,7 @@ function render(){
   document.documentElement.lang=S.lang;
   document.title=t("app");
   document.querySelectorAll("[data-t]").forEach(e=>e.textContent=t(e.dataset.t));
+  document.getElementById("guide").innerHTML=t("guide").map(([k,v])=>`<li><b>${k}</b>${v}</li>`).join("");
   document.querySelectorAll("[data-lang]").forEach(b=>b.classList.toggle("on",b.dataset.lang===S.lang));
   document.querySelectorAll("[data-tt]").forEach(e=>{e.title=t(e.dataset.tt);e.setAttribute("aria-label",t(e.dataset.tt))});
   updateUndo();
@@ -544,8 +548,19 @@ document.getElementById("cropOk").onclick=()=>{
 };
 
 /* ---- export ---- */
+async function captureSheet(type){
+  const mime=type==="png"?"image/png":"image/jpeg";
+  if(window.htmlToImage){
+    try{
+      const o={pixelRatio:2,backgroundColor:"#fffafb",width:sheet.offsetWidth,height:sheet.offsetHeight,style:{margin:"0"},quality:.95};
+      return type==="png"?await htmlToImage.toPng(sheet,o):await htmlToImage.toJpeg(sheet,o);
+    }catch(err){console.warn("html-to-image failed, falling back",err)}
+  }
+  if(typeof html2canvas!=="function")throw new Error("no capture library");
+  const c=await html2canvas(sheet,{scale:2,backgroundColor:"#fffafb",useCORS:true,windowWidth:sheet.scrollWidth+80,scrollX:0,scrollY:-window.scrollY});
+  return c.toDataURL(mime,.95);
+}
 async function exportImg(type){
-  if(typeof html2canvas!=="function"){alert("html2canvas load failed");return}
   const btn=document.getElementById(type==="png"?"savePng":"saveJpg");btn.textContent=t("exporting");btn.disabled=true;
   document.activeElement&&document.activeElement.blur();
   const filled=x=>!!(x.img||x.pc.trim()||x.scen.trim());
@@ -555,13 +570,12 @@ async function exportImg(type){
   sheet.classList.add("exporting");
   try{
     if(document.fonts&&document.fonts.ready)await document.fonts.ready;
-    const c=await html2canvas(sheet,{scale:2,backgroundColor:"#fffafb",useCORS:true,
-      windowWidth:sheet.scrollWidth+80,scrollX:0,scrollY:-window.scrollY});
-    const url=c.toDataURL(type==="png"?"image/png":"image/jpeg",.95);
+    const url=await captureSheet(type);
     const name=`HO_${safeName()}.${type}`;
     const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
     document.getElementById("result").innerHTML=`<img src="${url}" alt="">`;
     document.getElementById("resultModal").hidden=false;
+  }catch(err){toast(t("exportErr"),5000);console.error(err)
   }finally{
     sheet.classList.remove("exporting","hide-empty");btn.disabled=false;btn.textContent=t(type);
   }
