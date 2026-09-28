@@ -112,7 +112,11 @@ body.locked .bar,body.locked .tip,body.locked .scroller{display:none}
 .rulepop form{display:flex;gap:6px}
 .rulepop input{flex:1;min-width:0;border:1px solid var(--ui-line);border-radius:8px;padding:6px 8px;font-size:13px;font-family:inherit}
 .rulepop .btn{padding:5px 12px}
-.rulepop .del{align-self:flex-start;border:0;background:none;color:#b03a4a;font-size:12px;cursor:pointer;padding:2px 0;font-family:inherit}
+.rulepop .rc{width:32px;flex:none;border-radius:8px;border:1px solid var(--ui-line);position:relative;overflow:hidden;cursor:pointer}
+.rulepop .rc input{position:absolute;inset:-8px;width:48px;height:48px;border:0;padding:0;cursor:pointer}
+.rulepop .foot2{display:flex;justify-content:space-between;gap:8px}
+.rulepop .foot2 button{border:0;background:none;font-size:12px;cursor:pointer;padding:2px 0;font-family:inherit;color:#8a8190}
+.rulepop .foot2 .del{color:#b03a4a;font-size:12px;cursor:pointer;padding:2px 0;font-family:inherit}
 .cap{text-align:center;line-height:1.35;min-height:1.35em}
 .cap.scen{font-size:11px;font-weight:700;color:var(--deep);margin-top:4px}
 .cap.pc{font-size:14px;font-weight:900;color:#2a2530}
@@ -226,10 +230,10 @@ const THEMES={
 };
 const TX={
  ko:{app:"HO Maker",theme:"테마",lang:"언어",png:"PNG로 저장",jpg:"JPG로 저장",reset:"초기화",
-  tip:"칸을 누르거나 사진을 끌어다 놓으면 업로드 · 사진은 끌어서 자리 이동 · 글자는 눌러서 수정",
+  tip:"칸을 누르거나 사진을 끌어다 놓으면 업로드 · 사진은 끌어서 자리 이동 · 글자는 눌러서 수정 · 사진 왼쪽 위 「# 룰」을 눌러 태그 추가",
   crop:"사진 자르기",cropHint:"드래그로 위치를, 슬라이더(또는 마우스 휠)로 크기를 조절하세요.",
   cancel:"취소",ok:"적용",saved:"이미지를 만들었어요",savedHint:"다운로드가 안 되면 이미지를 길게 누르거나 우클릭해서 저장하세요.",close:"닫기",
-  band:"TRPG · 4PL 시나리오",sub:"어떤 HO를 제일 많이 했을까?",addSlot:"+ 칸 추가",ruleAdd:"# 룰",rulePh:"룰 이름 (예: CoC6)",ruleDel:"태그 지우기",unit:"명",most:"MOST",
+  band:"TRPG · 4PL 시나리오",sub:"어떤 HO를 제일 많이 했을까?",addSlot:"+ 칸 추가",ruleAdd:"# 룰",rulePh:"룰 이름 (예: CoC7)",ruleColor:"태그 색",ruleTheme:"테마색 쓰기",ruleDel:"태그 지우기",unit:"명",most:"MOST",
   scenPh:"시나리오명",pcPh:"PC 이름",addRow:"+ 라인 추가",addEtc:"+ ETC 추가",delRow:"라인 삭제",delSlot:"칸 삭제",recrop:"다시 자르기",
   resetQ:"한 번 더 누르면 초기화",exporting:"만드는 중…",
   work:"작업",image:"이미지 저장",undo:"되돌리기 (Ctrl+Z)",redo:"다시 실행 (Ctrl+Y)",
@@ -238,10 +242,10 @@ const TX={
   loadErr:"HO Maker 작업 파일이 아니라서 불러오지 못했어요.",
   quota:"브라우저 저장 공간이 가득 찼어요. '작업 저장'으로 파일에 보관해 주세요.",notImage:"이미지 파일만 올릴 수 있어요."},
  ja:{app:"HO Maker",theme:"テーマ",lang:"言語",png:"PNGで保存",jpg:"JPGで保存",reset:"リセット",
-  tip:"枠をクリックまたは画像をドロップでアップロード · 画像はドラッグで移動 · 文字はクリックで編集",
+  tip:"枠をクリックまたは画像をドロップでアップロード · 画像はドラッグで移動 · 文字はクリックで編集 · 画像左上の「# ルール」でタグを追加",
   crop:"画像トリミング",cropHint:"ドラッグで位置、スライダー（またはホイール）でサイズを調整できます。",
   cancel:"キャンセル",ok:"決定",saved:"画像ができました",savedHint:"ダウンロードされない場合は、画像を長押しまたは右クリックで保存してください。",close:"閉じる",
-  band:"TRPG・4PLシナリオ",sub:"どのHOが一番多いかな？",addSlot:"+ 枠を追加",ruleAdd:"# ルール",rulePh:"ルール名（例：CoC6）",ruleDel:"タグを消す",unit:"人",most:"MOST",
+  band:"TRPG・4PLシナリオ",sub:"どのHOが一番多いかな？",addSlot:"+ 枠を追加",ruleAdd:"# ルール",rulePh:"ルール名（例：CoC7）",ruleColor:"タグの色",ruleTheme:"テーマ色に戻す",ruleDel:"タグを消す",unit:"人",most:"MOST",
   scenPh:"シナリオ名",pcPh:"PC名",addRow:"+ ライン追加",addEtc:"+ ETC追加",delRow:"ライン削除",delSlot:"枠を削除",recrop:"再トリミング",
   resetQ:"もう一度押すとリセット",exporting:"作成中…",
   work:"作業",image:"画像を保存",undo:"元に戻す (Ctrl+Z)",redo:"やり直す (Ctrl+Y)",
@@ -267,7 +271,7 @@ function normalize(o){
     band:typeof o.band==="string"?o.band:null, sub:typeof o.sub==="string"?o.sub:null,
     rows:o.rows.filter(r=>r&&Array.isArray(r.slots)).map(r=>({a:str(r.a),b:str(r.b),
       slots:r.slots.filter(Boolean).map(x=>{
-        const sl={img:okImg(x.img),pc:str(x.pc)||str(x.name),scen:str(x.scen),rule:str(x.rule)};
+        const sl={img:okImg(x.img),pc:str(x.pc)||str(x.name),scen:str(x.scen),rule:str(x.rule),ruleColor:HEX.test(x.ruleColor)?x.ruleColor:""};
         if(okImg(x.src)){sl.src=x.src;if(x.crop&&isFinite(x.crop.z))sl.crop={z:+x.crop.z,x:+x.crop.x||0,y:+x.crop.y||0}}
         return sl})}))
   };
@@ -323,26 +327,40 @@ function updateTally(){
   });
 }
 /* ---- 룰 태그 ---- */
-function ruleTag(rule,ri,si){
-  if(!rule)return`<button class="rule add edit-only" data-act="rule" data-ri="${ri}" data-si="${si}">${t("ruleAdd")}</button>`;
-  return`<button class="rule" data-act="rule" data-ri="${ri}" data-si="${si}" title="${esc(rule)}">${esc(rule)}</button>`;
+// 태그 색이 밝으면 진한 글자, 어두우면 흰 글자
+const inkOn=hex=>{const n=parseInt(hex.slice(1),16);return(.2126*(n>>16)+.7152*(n>>8&255)+.0722*(n&255))/255>.6?"#2a2530":"#ffffff"};
+function ruleTag(x,ri,si){
+  if(!x.rule)return`<button class="rule add edit-only" data-act="rule" data-ri="${ri}" data-si="${si}">${t("ruleAdd")}</button>`;
+  const st=x.ruleColor?` style="background:${x.ruleColor};color:${inkOn(x.ruleColor)}"`:"";
+  return`<button class="rule" data-act="rule" data-ri="${ri}" data-si="${si}"${st} title="${esc(x.rule)}">${esc(x.rule)}</button>`;
 }
 let rulePop=null;
 function closeRulePop(){if(rulePop){rulePop.remove();rulePop=null}}
 function openRulePop(btn,ri,si){
   closeRulePop();
-  const cur=S.rows[ri].slots[si].rule;
+  const slot=S.rows[ri].slots[si],cur=slot.rule,curC=slot.ruleColor||"";
+  // 같은 이름의 태그에 이미 정한 색이 있으면 그 색을 기본으로
+  const sameColor=name=>{for(const r of S.rows)for(const x of r.slots)if(x!==slot&&x.rule===name&&x.ruleColor)return x.ruleColor;return""};
+  let pick=curC,touched=false;
   const el=document.createElement("div");el.className="rulepop";
-  el.innerHTML=`<form><input id="ruleInput" maxlength="20" placeholder="${esc(t("rulePh"))}" value="${esc(cur)}"><button class="btn primary" type="submit">OK</button></form>
-    ${cur?`<button type="button" class="del">${t("ruleDel")}</button>`:""}`;
+  el.innerHTML=`<form><input id="ruleInput" maxlength="20" placeholder="${esc(t("rulePh"))}" value="${esc(cur)}">
+      <label class="rc" title="${esc(t("ruleColor"))}"><input type="color" id="ruleColorInput" value="${curC||themeColors()[0]}" aria-label="${esc(t("ruleColor"))}"></label>
+      <button class="btn primary" type="submit">OK</button></form>
+    <div class="foot2"><button type="button" class="usetheme">${t("ruleTheme")}</button>${cur?`<button type="button" class="del">${t("ruleDel")}</button>`:""}</div>`;
   document.body.appendChild(el);rulePop=el;
-  const set=v=>{v=v.trim();closeRulePop();if(v===cur)return;remember();S.rows[ri].slots[si].rule=v;render()};
-  el.addEventListener("click",e=>{if(e.target.closest(".del"))set("")});
-  el.querySelector("form").addEventListener("submit",e=>{e.preventDefault();set(el.querySelector("input").value)});
+  const ci=el.querySelector("#ruleColorInput");
+  ci.addEventListener("input",()=>{pick=ci.value;touched=true});
+  const set=(v,c)=>{v=v.trim();if(!v)c="";closeRulePop();if(v===cur&&c===curC)return;remember();slot.rule=v;slot.ruleColor=c;render()};
+  const val=()=>el.querySelector("#ruleInput").value;
+  el.addEventListener("click",e=>{
+    if(e.target.closest(".del"))set("","");
+    else if(e.target.closest(".usetheme"))set(val()||cur,"");
+  });
+  el.querySelector("form").addEventListener("submit",e=>{e.preventDefault();const v=val().trim();set(v,touched?pick:(curC||sameColor(v)))});
   const r=btn.getBoundingClientRect(),w=el.offsetWidth,h=el.offsetHeight;
   el.style.left=Math.max(8,Math.min(r.left,innerWidth-w-8))+"px";
   el.style.top=(r.bottom+6+h>innerHeight?Math.max(8,r.top-h-6):r.bottom+6)+"px";
-  el.querySelector("input").focus();
+  el.querySelector("#ruleInput").focus();
 }
 document.addEventListener("mousedown",e=>{if(rulePop&&!rulePop.contains(e.target)&&!e.target.closest(".rule"))closeRulePop()});
 document.addEventListener("keydown",e=>{if(e.key==="Escape")closeRulePop()});
@@ -378,7 +396,7 @@ function render(){
     </div>
     <div class="cells" data-ri="${ri}">
       ${r.slots.map((s,si)=>`<div class="cell" data-ri="${ri}" data-si="${si}">
-        <div class="pic ${s.img?"":"empty"}" data-act="upload" data-ri="${ri}" data-si="${si}" draggable="${!!(s.img||s.pc||s.scen)}">${s.img?`<img src="${s.img}" alt="">`:"+"}${ruleTag(s.rule,ri,si)}</div>
+        <div class="pic ${s.img?"":"empty"}" data-act="upload" data-ri="${ri}" data-si="${si}" draggable="${!!(s.img||s.pc||s.scen)}">${s.img?`<img src="${s.img}" alt="">`:"+"}${ruleTag(s,ri,si)}</div>
         ${ed("cap scen",`data-ri="${ri}" data-si="${si}" data-s="scen"`,s.scen,t("scenPh"))}
         ${ed("cap pc",`data-ri="${ri}" data-si="${si}" data-s="pc"`,s.pc,t("pcPh"))}
         <button class="mini del edit-only" data-act="delslot" data-ri="${ri}" data-si="${si}" title="${t("delSlot")}" aria-label="${t("delSlot")}">✕</button>
