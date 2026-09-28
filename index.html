@@ -160,6 +160,8 @@ body.locked .bar,body.locked .tip,body.locked .scroller{display:none}
 .exporting .rule.add{display:none}
 .exporting .owner.is-empty{display:none}
 .exporting.hide-empty .cell.is-empty,.exporting.hide-empty .row.is-empty{display:none}
+/* 빈 칸 빼기를 안 켜도, 저장할 때 빈 칸은 자리만 남기고 줄 배경색으로 보이게 */
+.exporting:not(.hide-empty) .cell.is-empty{visibility:hidden}
 
 /* ---- modals ---- */
 .modal{position:fixed;inset:0;background:rgba(40,30,45,.55);display:flex;align-items:center;justify-content:center;padding:16px;z-index:10}
