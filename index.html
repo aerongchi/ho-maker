@@ -76,7 +76,12 @@ button,input{font-family:inherit}
 .mini.del{right:-8px;background:var(--deep);color:#fff}
 .mini.crop{left:-8px;background:#fff;color:var(--deep);box-shadow:0 0 0 1px var(--ui-line)}
 .tab .mini.del{top:-9px;right:-11px}
-.addcell .pic{border:2px dashed var(--main);background:transparent;box-shadow:none;color:var(--deep)}
+.rowhead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.rowhead .btn{margin-bottom:6px;padding:3px 12px;font-size:12px}
+@media (hover:hover){
+  .cell .mini,.tab .mini{opacity:0;transition:opacity .15s}
+  .cell:hover .mini,.tab:hover .mini,.mini:focus-visible{opacity:1}
+}
 .addrow{display:flex;gap:8px;margin:0 0 20px}
 .foot{display:flex;justify-content:flex-end;margin-top:8px;font-size:11px;letter-spacing:.08em;color:var(--deep);opacity:.7}
 
@@ -151,14 +156,14 @@ const TX={
   tip:"사진 칸을 누르면 업로드, ✂ 버튼으로 다시 자르기. 글자는 모두 눌러서 수정할 수 있어요.",
   crop:"사진 자르기",cropHint:"드래그로 위치를, 슬라이더(또는 마우스 휠)로 크기를 조절하세요.",
   cancel:"취소",ok:"적용",saved:"이미지를 만들었어요",savedHint:"다운로드가 안 되면 이미지를 길게 누르거나 우클릭해서 저장하세요.",close:"닫기",
-  band:"TRPG · 4PL 시나리오",sub:"어떤 HO를 제일 많이 했을까?",owner:"PL 이름",unit:"명",most:"MOST",
+  band:"TRPG · 4PL 시나리오",sub:"어떤 HO를 제일 많이 했을까?",owner:"PL 이름",ownerPh:"이름 입력",addSlot:"+ 칸 추가",unit:"명",most:"MOST",
   scenPh:"시나리오명",pcPh:"PC 이름",addRow:"+ 라인 추가",addEtc:"+ ETC 추가",delRow:"라인 삭제",delSlot:"칸 삭제",recrop:"다시 자르기",
   resetQ:"한 번 더 누르면 초기화",exporting:"만드는 중…"},
  ja:{app:"HOメーカー",theme:"テーマ",lang:"言語",png:"PNG保存",jpg:"JPG保存",reset:"リセット",
   tip:"枠をクリックで画像アップロード、✂ボタンで再トリミング。文字はすべてクリックで編集できます。",
   crop:"画像トリミング",cropHint:"ドラッグで位置、スライダー（またはホイール）でサイズを調整できます。",
   cancel:"キャンセル",ok:"決定",saved:"画像ができました",savedHint:"ダウンロードされない場合は、画像を長押しまたは右クリックで保存してください。",close:"閉じる",
-  band:"TRPG・4PLシナリオ",sub:"どのHOが一番多いかな？",owner:"PLネーム",unit:"人",most:"MOST",
+  band:"TRPG・4PLシナリオ",sub:"どのHOが一番多いかな？",owner:"PLネーム",ownerPh:"名前を入力",addSlot:"+ 枠を追加",unit:"人",most:"MOST",
   scenPh:"シナリオ名",pcPh:"PC名",addRow:"+ ライン追加",addEtc:"+ ETC追加",delRow:"ライン削除",delSlot:"枠を削除",recrop:"再トリミング",
   resetQ:"もう一度押すとリセット",exporting:"作成中…"}
 };
@@ -206,16 +211,19 @@ function render(){
       ${ed("eyebrow",'data-f="band"',S.band??t("band"),t("band"))}
       ${ed("title",'data-f="sub"',S.sub??t("sub"),t("sub"))}
     </div>
-    <div class="owner"><small>${t("owner")}</small>${ed("",'data-f="owner"',S.owner,"")}</div>
+    <div class="owner"><small>${t("owner")}</small>${ed("",'data-f="owner"',S.owner,t("ownerPh"))}</div>
   </div>
   <div class="tally" id="tally"></div>
   ${S.rows.map((r,ri)=>`
   <div class="row">
+    <div class="rowhead">
     <div class="tab">
       ${ed("l1",`data-ri="${ri}" data-k="a"`,r.a,"")}
       ${ed("l2",`data-ri="${ri}" data-k="b"`,r.b,"")}
       <span class="cnt" data-cnt="${ri}"></span><span class="most" data-most="${ri}" hidden>${t("most")}</span>
       <button class="mini del edit-only" data-act="delrow" data-ri="${ri}" title="${t("delRow")}" aria-label="${t("delRow")}">✕</button>
+    </div>
+    <button class="btn edit-only" data-act="addslot" data-ri="${ri}">${t("addSlot")}</button>
     </div>
     <div class="cells">
       ${r.slots.map((s,si)=>`<div class="cell">
@@ -225,7 +233,6 @@ function render(){
         <button class="mini del edit-only" data-act="delslot" data-ri="${ri}" data-si="${si}" title="${t("delSlot")}" aria-label="${t("delSlot")}">✕</button>
         ${s.img?`<button class="mini crop edit-only" data-act="recrop" data-ri="${ri}" data-si="${si}" title="${t("recrop")}" aria-label="${t("recrop")}">✂</button>`:""}
       </div>`).join("")}
-      <div class="cell addcell edit-only"><div class="pic" data-act="addslot" data-ri="${ri}">＋</div></div>
     </div>
   </div>`).join("")}
   <div class="addrow edit-only"><button class="btn" data-act="addrow">${t("addRow")}</button><button class="btn" data-act="addetc">${t("addEtc")}</button></div>
