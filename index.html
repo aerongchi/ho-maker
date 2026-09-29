@@ -574,11 +574,37 @@ document.getElementById("cropOk").onclick=()=>{
 };
 
 /* ---- export ---- */
+// 저장 이미지에 글꼴을 직접 넣음. 라이브러리에 맡기면 글꼴 받기에 실패해도 조용히 기본 글꼴로 저장돼서
+// 글자 모양과 정렬이 틀어짐. 화면과 똑같은 글꼴 파일 중 시트에 쓰인 글자가 든 조각만 골라 data URI로 넘김
+const FONT_CSS=document.querySelector('link[href*="fonts.googleapis.com/css2"]').href;
+const toDataURL=blob=>new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result);r.onerror=rej;r.readAsDataURL(blob)});
+let fontListCSS=null;const fontFiles=new Map();
+function coversAny(range,cps){
+  return range.split(",").some(part=>{
+    const p=part.trim().replace(/^U\+/i,"");
+    const[a,z]=p.includes("-")?p.split("-").map(x=>parseInt(x,16)):[parseInt(p.replace(/\?/g,"0"),16),parseInt(p.replace(/\?/g,"F"),16)];
+    for(const c of cps)if(c>=a&&c<=z)return true;
+    return false;
+  });
+}
+async function buildFontCSS(){
+  if(!fontListCSS){const r=await fetch(FONT_CSS);if(!r.ok)throw new Error("font css "+r.status);fontListCSS=await r.text()}
+  const cps=new Set([...sheet.innerText].map(c=>c.codePointAt(0)));
+  const blocks=(fontListCSS.match(/@font-face\s*\{[^}]*\}/g)||[]).filter(b=>{const m=b.match(/unicode-range:\s*([^;]+);/);return!m||coversAny(m[1],cps)});
+  if(!blocks.length)throw new Error("no font blocks");
+  let css=blocks.join("\n");
+  const urls=[...new Set(css.match(/https:\/\/fonts\.gstatic\.com\/[^)'"\s]+/g)||[])];
+  await Promise.all(urls.filter(u=>!fontFiles.has(u)).map(async u=>{
+    const f=await fetch(u);if(!f.ok)throw new Error("font "+f.status);fontFiles.set(u,await toDataURL(await f.blob()))}));
+  urls.forEach(u=>{css=css.split(u).join(fontFiles.get(u))});
+  return css;
+}
 async function captureSheet(type){
   const mime=type==="png"?"image/png":"image/jpeg";
   if(window.htmlToImage){
     try{
       const o={pixelRatio:2,backgroundColor:"#ffffff",width:sheet.offsetWidth,height:sheet.offsetHeight,style:{margin:"0"},quality:.95};
+      try{o.fontEmbedCSS=await buildFontCSS()}catch(err){console.warn("font subset failed, using library font embedding",err)}
       return type==="png"?await htmlToImage.toPng(sheet,o):await htmlToImage.toJpeg(sheet,o);
     }catch(err){console.warn("html-to-image failed, falling back",err)}
   }
