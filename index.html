@@ -295,11 +295,29 @@ function normalize(o){
         return sl})}))
   };
 }
+/* ---- 자동 저장: 사진이 많으면 localStorage(약 5MB)가 금방 차서 IndexedDB에 저장 ---- */
+const DB=(()=>{
+  let p;
+  const open=()=>p||(p=new Promise((res,rej)=>{const r=indexedDB.open("ho-maker",1);r.onupgradeneeded=()=>r.result.createObjectStore("kv");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)}));
+  return{
+    get:k=>open().then(db=>new Promise((res,rej)=>{const q=db.transaction("kv").objectStore("kv").get(k);q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)})),
+    set:(k,v)=>open().then(db=>new Promise((res,rej)=>{const tx=db.transaction("kv","readwrite");tx.objectStore("kv").put(v,k);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);tx.onabort=()=>rej(tx.error)}))
+  };
+})();
+// 예전 버전이 localStorage에 남긴 작업이 있으면 먼저 보여주고, IndexedDB에서 읽어오면 그걸로 바꿈
 let S; try{S=normalize(JSON.parse(localStorage.getItem("ho-maker")))}catch(e){}
 if(!S)S=normalize(blank());
 
-let quotaWarned=false;
-const save=()=>{try{localStorage.setItem("ho-maker",JSON.stringify(S))}catch(e){if(!quotaWarned){quotaWarned=true;toast(t("quota"),6000)}}};
+let quotaWarned=false,stateLoaded=false,saveTimer=null;
+function writeState(){
+  saveTimer=null;
+  const json=JSON.stringify(S);
+  DB.set("state",json).then(()=>{try{localStorage.removeItem("ho-maker")}catch(e){}})
+    .catch(()=>{try{localStorage.setItem("ho-maker",json)}catch(e){if(!quotaWarned){quotaWarned=true;toast(t("quota"),6000)}}});
+}
+// 불러오기가 끝나기 전에는 저장하지 않음 (빈 시트로 덮어쓰지 않도록)
+const save=()=>{if(!stateLoaded)return;clearTimeout(saveTimer);saveTimer=setTimeout(writeState,200)};
+addEventListener("pagehide",()=>{if(saveTimer){clearTimeout(saveTimer);writeState()}});
 let toastTimer;
 function toast(msg,ms=3000){const el=document.getElementById("toast");el.textContent=msg;el.hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>{el.hidden=true},ms)}
 
@@ -334,9 +352,10 @@ function applyTheme(){
   const cs=document.getElementById("customSw");cs.setAttribute("aria-pressed",String(S.theme==="custom"));cs.title=t("custom");
   document.getElementById("customColor").value=S.custom;
 }
-// 사진이나 PC 이름이 들어간 칸만 셈
+// 사진·PC 이름·시나리오명 중 하나라도 들어간 칸을 셈 (저장 이미지에 보이는 칸과 같은 기준)
+const filled=x=>!!(x.img||x.pc.trim()||x.scen.trim());
 function updateTally(){
-  const counts=S.rows.map(r=>r.slots.filter(s=>s.img||s.pc.trim()).length);
+  const counts=S.rows.map(r=>r.slots.filter(filled).length);
   const max=Math.max(0,...counts);
   document.getElementById("tally").innerHTML=S.rows.map((r,i)=>
     `<span class="chip${counts[i]&&counts[i]===max?" top":""}">${esc((r.a+" "+r.b).trim())}<b>${counts[i]}</b></span>`).join("");
@@ -380,7 +399,13 @@ function openRulePop(btn,ri,si){
     if(e.target.closest(".del"))set("","");
   });
   hx.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();el.querySelector("form").requestSubmit()}});
-  el.querySelector("form").addEventListener("submit",e=>{e.preventDefault();const v=val().trim();set(v,touched?pick:(curC||sameColor(v)))});
+  // 룰 이름을 일본어로 변환 중일 때 Enter가 바로 적용되지 않게
+  let composing=false;
+  const ri_=el.querySelector("#ruleInput");
+  ri_.addEventListener("compositionstart",()=>{composing=true});
+  ri_.addEventListener("compositionend",()=>{setTimeout(()=>{composing=false})});
+  ri_.addEventListener("keydown",e=>{if(e.key==="Enter"&&(e.isComposing||e.keyCode===229||composing))e.preventDefault()});
+  el.querySelector("form").addEventListener("submit",e=>{e.preventDefault();if(composing)return;const v=val().trim();set(v,touched?pick:(curC||sameColor(v)))});
   const r=btn.getBoundingClientRect(),w=el.offsetWidth,h=el.offsetHeight;
   el.style.left=Math.max(8,Math.min(r.left,innerWidth-w-8))+"px";
   el.style.top=(r.bottom+6+h>innerHeight?Math.max(8,r.top-h-6):r.bottom+6)+"px";
@@ -449,11 +474,15 @@ sheet.addEventListener("input",e=>{
   const d=el.dataset;
   if(d.f){S[d.f]=v;if(d.f==="owner")el.parentElement.classList.toggle("is-empty",!v.trim())}
   else if(d.k)S.rows[d.ri][d.k]=v;
-  else if(d.s)S.rows[d.ri].slots[d.si][d.s]=v;
-  if(d.k||d.s==="pc")updateTally();
+  else if(d.s){
+    const x=S.rows[d.ri].slots[d.si];x[d.s]=v;
+    const p=el.parentElement.querySelector(".pic");if(p)p.draggable=filled(x);
+  }
+  if(d.k||d.s)updateTally();
   save();
 });
-sheet.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.closest(".ed")){e.preventDefault();e.target.blur()}});
+// Enter로 입력 끝내기. 단, 일본어·한국어 입력기가 글자를 조합하는 중의 Enter(변환 확정)는 건드리지 않음
+sheet.addEventListener("keydown",e=>{if(e.key==="Enter"&&!e.isComposing&&e.keyCode!==229&&e.target.closest(".ed")){e.preventDefault();e.target.blur()}});
 sheet.addEventListener("paste",e=>{
   if(!e.target.closest(".ed"))return;e.preventDefault();
   const txt=(e.clipboardData||window.clipboardData).getData("text").replace(/\s*\n\s*/g," ");
@@ -473,7 +502,8 @@ sheet.addEventListener("click",e=>{
   if(act==="delslot")S.rows[ri].slots.splice(si,1);
   if(act==="addslot")S.rows[ri].slots.push(emptySlot());
   if(act==="delrow")S.rows.splice(ri,1);
-  if(act==="addrow")S.rows.push(newRow("HO",String(S.rows.filter(r=>r.a==="HO").length+1)));
+  // 중간 라인을 지운 뒤에도 번호가 겹치지 않게, 지금 있는 HO 번호 중 가장 큰 수 + 1
+  if(act==="addrow")S.rows.push(newRow("HO",String(Math.max(0,...S.rows.filter(r=>r.a==="HO").map(r=>parseInt(r.b,10)||0))+1)));
   if(act==="addetc")S.rows.push(newRow("","ETC"));
   render();
 });
@@ -490,8 +520,10 @@ cc.addEventListener("change",()=>{S.custom=cc.value;save()});
 
 document.querySelectorAll("[data-lang]").forEach(b=>b.onclick=()=>{
   // 기본 문구를 그대로 쓰고 있었다면 새 언어의 기본 문구로 바꿈
+  if(S.lang===b.dataset.lang)return;
+  remember();
   const old=TX[S.lang];if(S.band===old.band)S.band=null;if(S.sub===old.sub)S.sub=null;
-  if(S.lang===b.dataset.lang)return;remember();S.lang=b.dataset.lang;render()});
+  S.lang=b.dataset.lang;render()});
 let resetArm=0;const rb=document.getElementById("resetBtn");
 rb.onclick=()=>{
   if(Date.now()-resetArm<4000){remember();const{lang,theme,custom,showOwner}=S;S={...normalize(blank()),lang,theme,custom,showOwner};resetArm=0;render()}
@@ -612,20 +644,23 @@ async function captureSheet(type){
   const c=await html2canvas(sheet,{scale:2,backgroundColor:"#ffffff",useCORS:true,windowWidth:sheet.scrollWidth+80,scrollX:0,scrollY:-window.scrollY});
   return c.toDataURL(mime,.95);
 }
+let resultUrl=null;
 async function exportImg(type){
   const btn=document.getElementById(type==="png"?"savePng":"saveJpg");btn.textContent=t("exporting");btn.disabled=true;
   document.activeElement&&document.activeElement.blur();
-  const filled=x=>!!(x.img||x.pc.trim()||x.scen.trim());
   sheet.querySelectorAll(".cell[data-si]").forEach(c=>c.classList.toggle("is-empty",!filled(S.rows[c.dataset.ri].slots[c.dataset.si])));
   sheet.querySelectorAll(".row").forEach((r,i)=>r.classList.toggle("is-empty",!S.rows[i].slots.some(filled)));
   sheet.classList.toggle("hide-empty",document.getElementById("hideEmpty").checked);
   sheet.classList.add("exporting");
   try{
     if(document.fonts&&document.fonts.ready)await document.fonts.ready;
-    const url=await captureSheet(type);
-    const name=`HO_${safeName()}.${type}`;
-    const a=document.createElement("a");a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
-    document.getElementById("result").innerHTML=`<img src="${url}" alt="">`;
+    const dataUrl=await captureSheet(type);
+    // 크롬은 data URL 링크를 약 2MB까지만 받아서, 사진이 많은 큰 이미지는 Blob 주소로 바꿔 내려받음
+    const blob=await (await fetch(dataUrl)).blob();
+    if(resultUrl)URL.revokeObjectURL(resultUrl);
+    resultUrl=URL.createObjectURL(blob);
+    const a=document.createElement("a");a.href=resultUrl;a.download=`HO_${safeName()}.${type}`;document.body.appendChild(a);a.click();a.remove();
+    document.getElementById("result").innerHTML=`<img src="${resultUrl}" alt="">`;
     document.getElementById("resultModal").hidden=false;
   }catch(err){toast(t("exportErr"),5000);console.error(err)
   }finally{
@@ -678,6 +713,10 @@ document.addEventListener("keydown",e=>{
 });
 
 render();
+DB.get("state").then(json=>{
+  const n=json?normalize(JSON.parse(json)):null;
+  if(n){S=n;render()}
+}).catch(()=>{}).finally(()=>{stateLoaded=true;save()});
 
 /* ---- 비밀번호 화면 (SHA-256 해시만 코드에 둠) ---- */
 const PW_HASH="8c8138f0a5f6fde305deecd0395d8e08aedbe1cfb356f3f7064b246280b35219";
